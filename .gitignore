@@ -1,0 +1,11 @@
+/ws/*
+/*/bin/*
+/target/*
+/*/target/*
+/*/.*
+/*/*/target/*
+/*/*/.*
+/*/*/*/target/*
+/*/*/*/.*
+/*/deprecated/*
+.DS_Store

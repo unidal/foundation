@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.unidal</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.unidal.foundation</groupId>
+	<artifactId>parent</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+	<name>Foundation</name>
+	<description>Unidal Foundation</description>
+	<modules>
+		<module>foundation-service</module>
+	</modules>
+	<url>https://github.com/unidal/foundation</url>
+	<scm>
+		<connection>scm:git:git://github.com/unidal/foundation.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/unidal/foundation.git</developerConnection>
+		<url>https://github.com/unidal/foundation/tree/master</url>
+		<tag>HEAD</tag>
+	</scm>
+	<properties>
+		<junit.version>4.12</junit.version>
+		<netty-all.version>4.0.24.Final</netty-all.version>
+		<log4j.version>1.2.17</log4j.version>
+
+		<!-- plugin version -->
+		<codegen.plugin.version>3.0.5</codegen.plugin.version>
+		<plexus.plugin.version>3.0.5</plexus.plugin.version>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty-all.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.unidal.maven.plugins</groupId>
+					<artifactId>codegen-maven-plugin</artifactId>
+					<version>${codegen.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.unidal.maven.plugins</groupId>
+					<artifactId>plexus-maven-plugin</artifactId>
+					<version>${plexus.plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
+

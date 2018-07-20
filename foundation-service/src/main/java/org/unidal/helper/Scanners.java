@@ -74,7 +74,7 @@ public class Scanners {
 
                relativePath.append(item);
 
-               IMatcher.Direction direction = matcher.matches(base, relativePath.toString());
+               Direction direction = matcher.matches(base, relativePath.toString());
 
                if (direction == null) {
                   direction = Direction.NEXT;
@@ -306,10 +306,12 @@ public class Scanners {
 
          if ("file".equals(protocol)) { // local file folder
             scanFile(urls, base, matcher);
-         } else if ("jar".equals(protocol)) { // normal jar
+         } else if ("jar".equals(protocol)) { // normal jar file
             scanJar(urls, base, resourceBase, matcher);
+         } else if ("zip".equals(protocol)) { // weblogic jar, zip file
+            scanZip(urls, base, resourceBase, matcher);
          } else if ("wsjar".equals(protocol)) { // websphere jar, zip file
-            scanWsjar(urls, base, resourceBase, matcher);
+            scanZip(urls, base, resourceBase, matcher);
          }
       }
 
@@ -411,7 +413,7 @@ public class Scanners {
          }
       }
 
-      private void scanWsjar(final List<URL> urls, final URL base, final String resourceBase, final ResourceMatcher matcher)
+      private void scanZip(final List<URL> urls, final URL base, final String resourceBase, final ResourceMatcher matcher)
             throws IOException {
          String path = base.getPath();
          int pos = path.lastIndexOf("!/");
@@ -454,7 +456,5 @@ public class Scanners {
       public boolean isFileElegible() {
          return true;
       }
-
-      public abstract Direction matches(ZipEntry entry, String path);
    }
 }

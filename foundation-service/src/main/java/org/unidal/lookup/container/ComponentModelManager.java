@@ -158,7 +158,7 @@ public class ComponentModelManager {
 
             // ignore configuration from official plexus-container-default.jar
             if (path.contains("/plexus-container-default/")) {
-               return Direction.NEXT;
+               return Direction.DOWN;
             }
 
             if (path.equals("plexus.xml") || path.equals("components.xml") || path.startsWith("components-")) {
@@ -173,6 +173,7 @@ public class ComponentModelManager {
                   }
 
                   components.add(new URL(url));
+                  return Direction.MATCHED;
                } catch (Throwable e) {
                   // ignore it
                }

@@ -83,8 +83,24 @@ public class Component {
       return role.hashCode() * 31 + (roleHint == null ? 0 : roleHint.hashCode());
    }
 
+   /**
+    * Set an instantiation strategy, one of values: singleton, enum, per-lookup.
+    * 
+    * @param instantiationStrategy
+    * @return component
+    */
    public Component is(String instantiationStrategy) {
       m_model.setInstantiationStrategy(instantiationStrategy);
+      return this;
+   }
+
+   /**
+    * Override original component, it has higher priority than original component despite of order of classpath.
+    * 
+    * @return component
+    */
+   public Component override() {
+      m_model.setOverrideOrigin(true);
       return this;
    }
 
@@ -115,7 +131,7 @@ public class Component {
    }
 
    /**
-    * NOTES: non-exist required components identified by role hints will be ignored silently.
+    * NOTES: non-existence required components identified by role hints will be ignored silently.
     * 
     * @param roleClass
     *           role class
@@ -141,7 +157,7 @@ public class Component {
       m_model.addRequirement(requirement);
       return this;
    }
-   
+
    @Override
    public String toString() {
       return m_model.toString();

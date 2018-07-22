@@ -11,7 +11,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 import org.unidal.lookup.logging.TimedConsoleLoggerManager;
 
-class ComponentsConfigurator extends AbstractResourceConfigurator {
+public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();

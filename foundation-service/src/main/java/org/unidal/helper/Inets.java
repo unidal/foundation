@@ -12,6 +12,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public enum Inets {
    IP4 {
+      /**
+       * In some environment, IPV6 has higher priority, but it could be disabled explicitly by
+       * <code>-Djava.net.preferIPv4Stack=true</code>.
+       * 
+       * @return IPV4 address list.
+       */
       @Override
       protected List<Address> getAllInetAddresses() {
          List<Address> all = new ArrayList<Address>();

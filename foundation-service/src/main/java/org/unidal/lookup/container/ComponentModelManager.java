@@ -36,34 +36,23 @@ public class ComponentModelManager {
 
    public ComponentModel getComponentModel(ComponentKey key) {
       ComponentModel model = m_cache.get(key);
-      boolean found = false;
 
-      if (!found) {
-         for (ComponentModel component : m_model.getComponents()) {
+      for (PlexusModel plexus : m_models) {
+         for (ComponentModel component : plexus.getComponents()) {
             if (key.matches(component.getRole(), component.getHint())) {
-               model = component;
-               found = true;
-               m_cache.put(key, component);
+               if (model == null) {
+                  model = component;
+               } else if (!model.isOverrideOrigin() && component.isOverrideOrigin()) { // component has been overridden
+                  model = component;
+               }
+
                break;
             }
          }
       }
 
-      if (!found) {
-         for (PlexusModel plexus : m_models) {
-            for (ComponentModel component : plexus.getComponents()) {
-               if (key.matches(component.getRole(), component.getHint())) {
-                  model = component;
-                  found = true;
-                  m_cache.put(key, component);
-                  break;
-               }
-            }
-
-            if (found) {
-               break;
-            }
-         }
+      if (model != null) {
+         m_cache.put(key, model);
       }
 
       return model;
@@ -188,9 +177,9 @@ public class ComponentModelManager {
 
    public void setComponentModel(ComponentKey key, Class<?> clazz) {
       for (PlexusModel model : m_models) {
-         ComponentModel component = new ComponentModel() //
-               .setRole(key.getRole()).setRoleHint(key.getRoleHint()).setImplementation(clazz.getName());
+         ComponentModel component = new ComponentModel();
 
+         component.setRole(key.getRole()).setRoleHint(key.getRoleHint()).setImplementation(clazz.getName());
          model.addComponent(component);
       }
    }

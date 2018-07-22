@@ -126,6 +126,38 @@ public class Files {
 
          return false;
       }
+
+      public String getAbsoluteFile(String file) {
+         if (file == null) {
+            return null;
+         } else if (file.startsWith("/")) {
+            return file;
+         } else if (file.startsWith("~/")) {
+            String userHome = System.getProperty("user.home");
+            String path = file.substring(2);
+
+            return new File(userHome, path).getAbsolutePath();
+         } else {
+            return new File(file).getAbsolutePath();
+         }
+      }
+
+      public String getAbsoluteFile(String dir, String file) {
+         if (dir == null) {
+            return file;
+         } else if (file == null) {
+            return null;
+         } else if (file.startsWith("/")) {
+            return file;
+         } else if (file.startsWith("~/")) {
+            String userHome = System.getProperty("user.home");
+            String path = file.substring(2);
+
+            return new File(userHome, path).getAbsolutePath();
+         } else {
+            return new File(dir, file).getAbsolutePath();
+         }
+      }
    }
 
    public enum IO {

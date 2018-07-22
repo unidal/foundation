@@ -9,7 +9,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.unidal.foundation</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.0.0</version>
+	<version>5.0.0</version>
 	<packaging>pom</packaging>
 	<name>Foundation</name>
 	<description>Unidal Foundation</description>
@@ -25,12 +25,11 @@
 	</scm>
 	<properties>
 		<junit.version>4.12</junit.version>
-		<netty-all.version>4.0.24.Final</netty-all.version>
 		<log4j.version>1.2.17</log4j.version>
 
 		<!-- plugin version -->
-		<codegen.plugin.version>3.0.5</codegen.plugin.version>
-		<plexus.plugin.version>3.0.5</plexus.plugin.version>
+		<codegen.plugin.version>4.0.0</codegen.plugin.version>
+		<plexus.plugin.version>4.0.0</plexus.plugin.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -38,11 +37,6 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-all</artifactId>
-				<version>${netty-all.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>log4j</groupId>

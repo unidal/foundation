@@ -18,6 +18,7 @@ import org.unidal.lookup.ContainerHolderTest;
 import org.unidal.lookup.ContainerLoaderTest;
 import org.unidal.lookup.PlexusContainerTest;
 import org.unidal.lookup.configuration.ConfiguratorTest;
+import org.unidal.lookup.container.ComponentFactoryTest;
 import org.unidal.lookup.container.ComponentModelManagerTest;
 import org.unidal.lookup.container.MyPlexusContainerTest;
 import org.unidal.lookup.logger.Log4jLoggerTest;
@@ -66,6 +67,8 @@ ComponentModelManagerTest.class,
 MyPlexusContainerTest.class,
 
 Log4jLoggerTest.class,
+
+ComponentFactoryTest.class,
 
 })
 public class AllTests {

@@ -126,13 +126,13 @@ public class Objects {
 
       public String from(Object obj) {
          JsonBuilder sb = new JsonBuilder(new StringBuilder(2048));
-         Set<Object> done = new HashSet<Object>();
+         Set<Integer> done = new HashSet<Integer>();
 
          fromObject(done, sb, obj);
          return sb.toString();
       }
 
-      private void fromArray(Set<Object> done, JsonBuilder sb, Object obj) {
+      private void fromArray(Set<Integer> done, JsonBuilder sb, Object obj) {
          int len = Array.getLength(obj);
 
          sb.raw('[');
@@ -151,7 +151,7 @@ public class Objects {
       }
 
       @SuppressWarnings("unchecked")
-      private void fromCollection(Set<Object> done, JsonBuilder sb, Object obj) {
+      private void fromCollection(Set<Integer> done, JsonBuilder sb, Object obj) {
          boolean first = true;
 
          sb.raw('[');
@@ -170,7 +170,7 @@ public class Objects {
       }
 
       @SuppressWarnings("unchecked")
-      private void fromMap(Set<Object> done, JsonBuilder sb, Object obj) {
+      private void fromMap(Set<Integer> done, JsonBuilder sb, Object obj) {
          boolean first = true;
 
          sb.raw('{');
@@ -192,7 +192,7 @@ public class Objects {
          sb.raw('}');
       }
 
-      private void fromObject(Set<Object> done, JsonBuilder sb, Object obj) {
+      private void fromObject(Set<Integer> done, JsonBuilder sb, Object obj) {
          if (obj == null) {
             sb.raw("null");
          } else if (obj instanceof Formattable) {
@@ -225,25 +225,29 @@ public class Objects {
                sb.raw(obj.toString());
             } else if (type == Date.class) {
                sb.value(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(obj));
-            } else if (done.contains(obj)) {
-               sb.raw("{}");
             } else {
-               done.add(obj);
+               int key = System.identityHashCode(obj);
 
-               if (type.isArray()) {
-                  fromArray(done, sb, obj);
-               } else if (Collection.class.isAssignableFrom(type)) {
-                  fromCollection(done, sb, obj);
-               } else if (Map.class.isAssignableFrom(type)) {
-                  fromMap(done, sb, obj);
+               if (done.contains(key)) {
+                  sb.raw("{}");
                } else {
-                  fromPojo(done, sb, obj);
+                  done.add(key);
+
+                  if (type.isArray()) {
+                     fromArray(done, sb, obj);
+                  } else if (Collection.class.isAssignableFrom(type)) {
+                     fromCollection(done, sb, obj);
+                  } else if (Map.class.isAssignableFrom(type)) {
+                     fromMap(done, sb, obj);
+                  } else {
+                     fromPojo(done, sb, obj);
+                  }
                }
             }
          }
       }
 
-      private void fromPojo(Set<Object> done, JsonBuilder sb, Object obj) {
+      private void fromPojo(Set<Integer> done, JsonBuilder sb, Object obj) {
          Class<? extends Object> type = obj.getClass();
 
          if (hasToString(type)) {
@@ -306,7 +310,7 @@ public class Objects {
          }
       }
 
-      public boolean hasToString(Class<?> type) {
+      private boolean hasToString(Class<?> type) {
          try {
             Method method = type.getMethod("toString");
 
@@ -327,13 +331,13 @@ public class Objects {
 
       public String from(String name, Object obj) {
          XmlBuilder sb = new XmlBuilder(new StringBuilder(2048));
-         Set<Object> done = new HashSet<Object>();
+         Set<Integer> done = new HashSet<Integer>();
 
          fromObject(done, sb, name, obj);
          return sb.toString();
       }
 
-      private void fromArray(Set<Object> done, XmlBuilder sb, String names, String name, Object obj) {
+      private void fromArray(Set<Integer> done, XmlBuilder sb, String names, String name, Object obj) {
          int len = Array.getLength(obj);
 
          sb.tagStart(names);
@@ -348,7 +352,7 @@ public class Objects {
       }
 
       @SuppressWarnings("unchecked")
-      private void fromCollection(Set<Object> done, XmlBuilder sb, String names, String name, Object obj) {
+      private void fromCollection(Set<Integer> done, XmlBuilder sb, String names, String name, Object obj) {
          sb.tagStart(names);
 
          for (Object item : ((Collection<Object>) obj)) {
@@ -359,7 +363,7 @@ public class Objects {
       }
 
       @SuppressWarnings("unchecked")
-      private void fromMap(Set<Object> done, XmlBuilder sb, String names, String name, Object obj) {
+      private void fromMap(Set<Integer> done, XmlBuilder sb, String names, String name, Object obj) {
          sb.tagStart(names);
 
          for (Map.Entry<Object, Object> e : ((Map<Object, Object>) obj).entrySet()) {
@@ -374,7 +378,7 @@ public class Objects {
          sb.tagEnd(names);
       }
 
-      private void fromObject(Set<Object> done, XmlBuilder sb, String name, Object obj) {
+      private void fromObject(Set<Integer> done, XmlBuilder sb, String name, Object obj) {
          if (obj == null) {
             sb.raw("<").raw(name).raw("/>");
          } else {
@@ -419,23 +423,29 @@ public class Objects {
                   sb.raw("<!-- ref -->");
                   sb.tagEnd(name);
                } else {
-                  done.add(obj);
+                  int key = System.identityHashCode(obj);
 
-                  if (type.isArray()) {
-                     fromArray(done, sb, null, name, obj);
-                  } else if (Collection.class.isAssignableFrom(type)) {
-                     fromCollection(done, sb, null, name, obj);
-                  } else if (Map.class.isAssignableFrom(type)) {
-                     fromMap(done, sb, null, name, obj);
+                  if (done.contains(key)) {
+                     sb.raw("<!-- " + obj.getClass().getName() + ":" + key + " -->");
                   } else {
-                     fromPojo(done, sb, name, obj);
+                     done.add(key);
+
+                     if (type.isArray()) {
+                        fromArray(done, sb, null, name, obj);
+                     } else if (Collection.class.isAssignableFrom(type)) {
+                        fromCollection(done, sb, null, name, obj);
+                     } else if (Map.class.isAssignableFrom(type)) {
+                        fromMap(done, sb, null, name, obj);
+                     } else {
+                        fromPojo(done, sb, name, obj);
+                     }
                   }
                }
             }
          }
       }
 
-      private void fromPojo(Set<Object> done, XmlBuilder sb, String name, Object obj) {
+      private void fromPojo(Set<Integer> done, XmlBuilder sb, String name, Object obj) {
          Class<? extends Object> type = obj.getClass();
 
          if (hasToXml(type)) {

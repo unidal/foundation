@@ -47,7 +47,7 @@ public class DefaultModuleInitializer implements ModuleInitializer {
       }
    }
 
-   private synchronized void executeModule(ModuleContext ctx, Module module, int index) throws Exception {
+   private void executeModule(ModuleContext ctx, Module module, int index) throws Exception {
       long start = System.currentTimeMillis();
 
       // set flag to avoid re-entrance

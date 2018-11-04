@@ -95,24 +95,24 @@ public class Splitters {
    }
 
    public static class StringSplitter {
-      private char m_charDelimiter;
+      private char m_charDelimeter;
 
-      private String m_stringDelimiter;
+      private String m_stringDelimeter;
 
       private boolean m_trim;
 
       private boolean m_noEmptyItem;
 
       StringSplitter(char delimiter) {
-         m_charDelimiter = delimiter;
+         m_charDelimeter = delimiter;
       }
 
       StringSplitter(String delimiter) {
-         m_stringDelimiter = delimiter;
+         m_stringDelimeter = delimiter;
       }
 
       protected void doCharSplit(String str, List<String> list) {
-         char delimiter = m_charDelimiter;
+         char delimiter = m_charDelimeter;
          int len = str.length();
          StringBuilder sb = new StringBuilder(len);
 
@@ -140,7 +140,7 @@ public class Splitters {
       }
 
       protected void doStringSplit(String source, List<String> list) {
-         String delimiter = m_stringDelimiter;
+         String delimiter = m_stringDelimeter;
          int len = delimiter.length();
          int offset = 0;
          int index = source.indexOf(delimiter, offset);
@@ -182,9 +182,9 @@ public class Splitters {
 
       public List<String> split(String str, List<String> list) {
          if (str != null) {
-            if (m_charDelimiter > 0) {
+            if (m_charDelimeter > 0) {
                doCharSplit(str, list);
-            } else if (m_stringDelimiter != null) {
+            } else if (m_stringDelimeter != null) {
                doStringSplit(str, list);
             }
          }

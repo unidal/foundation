@@ -59,7 +59,8 @@ public class Threads {
     *           optional. true to make sleep happen, false to break
     * @param timeoutInMillis
     *           max time to sleep if <code>when</code> condition is null or met
-    * @throws InterruptedException when interrupted
+    * @throws InterruptedException
+    *            when interrupted
     */
    public static void sleep(AtomicBoolean when, long timeoutInMillis) throws InterruptedException {
       if (when != null && !when.get() || timeoutInMillis <= 0) {
@@ -217,15 +218,6 @@ public class Threads {
          }
       }
 
-      public void reset() {
-         for (ThreadGroupManager groupManager : m_groupManagers.values()) {
-            groupManager.shutdown();
-         }
-
-         m_groupManagers.clear();
-         m_listeners.clear();
-      }
-
       public void addListener(ThreadListener listener) {
          m_listeners.add(listener);
       }
@@ -302,6 +294,15 @@ public class Threads {
          m_listeners.remove(listener);
       }
 
+      public void reset() {
+         for (ThreadGroupManager groupManager : m_groupManagers.values()) {
+            groupManager.shutdown();
+         }
+
+         m_groupManagers.clear();
+         m_listeners.clear();
+      }
+
       public void shutdownAll() {
          try {
             for (ThreadGroupManager manager : m_groupManagers.values()) {
@@ -349,6 +350,10 @@ public class Threads {
          }
       }
 
+      public void await() throws InterruptedException {
+         m_latch.await();
+      }
+
       private String getCaller() {
          StackTraceElement[] elements = new Exception().getStackTrace();
          String prefix = Threads.class.getName() + "$";
@@ -380,10 +385,6 @@ public class Threads {
          return m_target;
       }
 
-      public void await() throws InterruptedException {
-         m_latch.await();
-      }
-
       @Override
       public void run() {
          m_callerThreadLocal.set(m_caller);
@@ -400,6 +401,44 @@ public class Threads {
          } else {
             System.out.println(String.format("Thread(%s) is shutdown! ", getName()));
             interrupt();
+         }
+      }
+   }
+
+   // the sample task is just a code template for copy & paste
+   static class SampleTask implements Task {
+      private AtomicBoolean m_enabled = new AtomicBoolean(true);
+
+      private CountDownLatch m_latch = new CountDownLatch(1);
+
+      @Override
+      public String getName() {
+         return getClass().getSimpleName();
+      }
+
+      @Override
+      public void run() {
+         try {
+            while (m_enabled.get()) {
+               // your job goes here
+
+               TimeUnit.MILLISECONDS.sleep(1000); // sleep 1 second
+            }
+         } catch (InterruptedException e) {
+            // ignore it
+         } finally {
+            m_latch.countDown();
+         }
+      }
+
+      @Override
+      public void shutdown() {
+         m_enabled.set(false);
+
+         try {
+            m_latch.await();
+         } catch (InterruptedException e) {
+            // ignore it
          }
       }
    }

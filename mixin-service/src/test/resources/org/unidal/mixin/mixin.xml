@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mixin>
+   <class class="org.unidal.mixin.sample.greeting.Greeting">
+      <target name="org/unidal/mixin/sample/greeting/Greeting">
+         <field access="10" name="$_DEBUG" desc="Z" source-name="DEBUG" source-class="org/unidal/mixin/sample/greeting/Greeting"/>
+         <field access="10" name="DEBUG" desc="Z" source-name="DEBUG" source-class="org/unidal/mixin/sample/greeting/GreetingMixin"/>
+         <field access="10" name="VERBOSE" desc="Z" source-name="VERBOSE" source-class="org/unidal/mixin/sample/greeting/GreetingMixin2"/>
+         <field access="2" name="m_helper" desc="Lorg/unidal/mixin/sample/greeting/Greeting$Helper;" source-name="m_helper" source-class="org/unidal/mixin/sample/greeting/GreetingMixin2"/>
+         <method access="2" name="$2_sayBye" super-name="$_sayBye" source-name="sayBye" source-class="org/unidal/mixin/sample/greeting/Greeting" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <method access="2" name="$_sayBye" super-name="sayBye" source-name="sayBye" source-class="org/unidal/mixin/sample/greeting/GreetingMixin" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <method access="1" name="sayBye" super-name="" source-name="sayBye" source-class="org/unidal/mixin/sample/greeting/GreetingMixin2" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <inner-class access="10" name="org/unidal/mixin/sample/greeting/Greeting$Helper" outer-name="org/unidal/mixin/sample/greeting/Greeting" inner-name="Helper" source-name="org/unidal/mixin/sample/greeting/GreetingMixin2$Helper" source-outer-name="org/unidal/mixin/sample/greeting/GreetingMixin2"/>
+         <inner-class/>
+      </target>
+      <source name="org/unidal/cat/mixin/sample/greeting/GreetingMixin" class="org.unidal.mixin.sample.greeting.Greeting">
+         <field access="10" name="DEBUG" desc="Z"/>
+         <field access="10" name="VERBOSE" desc="Z"/>
+         <method access="8" name="&lt;clinit&gt;" desc="()V"/>
+         <method access="1" name="sayBye" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <method access="1" name="sayHello" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+      </source>
+      <source name="org/unidal/mixin/sample/greeting/GreetingMixin2" class="org.unidal.mixin.sample.greeting.Greeting">
+         <field access="2" name="m_helper" desc="Lorg/unidal/mixin/sample/greeting/GreetingMixin2$Helper;"/>
+         <method access="1" name="sayBye" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <method access="1" name="sayHello" desc="(Ljava/lang/String;)Ljava/lang/String;"/>
+         <inner-class access="10" name="org/unidal/mixin/sample/greeting/GreetingMixin2$Helper" outer-name="org/unidal/mixin/sample/greeting/GreetingMixin2" inner-name="Helper"/>
+         <inner-class/>
+      </source>
+   </class>
+   <class>
+   </class>
+</mixin>

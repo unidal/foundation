@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model model-package="org.unidal.mixin.model" class-suffix="Model" enable-sax-parser="true" enable-base-visitor="true" >
+  <entity name="mixin" root="true">
+    <entity-ref name="class" type="map" names="classes" method-find-or-create="true" />
+  </entity>
+  <entity name="class">
+    <attribute name="class" value-type="String" key="true" />
+    <entity-ref name="target" />
+    <entity-ref name="source" type="list" names="sources" method-find-or-create="true" />
+  </entity>
+  <entity name="target">
+    <attribute name="name" value-type="String" key="true" />
+    <entity-ref name="field" type="list" names="fields" method-find-or-create="true" />
+    <entity-ref name="method" type="list" names="methods" method-find-or-create="true" />
+    <entity-ref name="inner-class" type="list" names="inner-classes" method-find-or-create="true" />
+  </entity>
+  <entity name="field">
+    <attribute name="name" value-type="String" key="true" />
+  </entity>
+  <entity name="method">
+    <attribute name="name" value-type="String" key="true" />
+  </entity>
+  <entity name="source">
+    <attribute name="name" value-type="String" key="true" />
+    <entity-ref name="field" type="list" names="fields" method-find-or-create="true" />
+    <entity-ref name="method" type="list" names="methods" method-find-or-create="true" />
+    <entity-ref name="inner-class" type="list" names="inner-classes" method-find-or-create="true" />
+  </entity>
+  <entity name="inner-class">
+    <attribute name="inner-name" value-type="String" key="true" />
+  </entity>
+</model>
+

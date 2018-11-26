@@ -13,6 +13,28 @@
     <entity-ref name="field" type="list" names="fields" method-find-or-create="true" />
     <entity-ref name="method" type="list" names="methods" method-find-or-create="true" />
     <entity-ref name="inner-class" type="list" names="inner-classes" method-find-or-create="true" />
+    <snippet>
+      public MethodModel findOrCreateMethod(String name, String desc) {
+         synchronized (m_methods) {
+            for (MethodModel method : m_methods) {
+               if (!equals(method.getName(), name)) {
+                  continue;
+               }
+               
+               if (!equals(method.getDesc(), desc)) {
+                  continue;
+               }
+               
+               return method;
+            }
+            
+            MethodModel method = new MethodModel(name).setDesc(desc);
+            
+            m_methods.add(method);
+            return method;
+         }
+      }
+    </snippet>
   </entity>
   <entity name="field">
     <attribute name="name" value-type="String" key="true" />
@@ -25,6 +47,28 @@
     <entity-ref name="field" type="list" names="fields" method-find-or-create="true" />
     <entity-ref name="method" type="list" names="methods" method-find-or-create="true" />
     <entity-ref name="inner-class" type="list" names="inner-classes" method-find-or-create="true" />
+    <snippet>
+      public MethodModel findOrCreateMethod(String name, String desc) {
+         synchronized (m_methods) {
+            for (MethodModel method : m_methods) {
+               if (!equals(method.getName(), name)) {
+                  continue;
+               }
+               
+               if (!equals(method.getDesc(), desc)) {
+                  continue;
+               }
+               
+               return method;
+            }
+            
+            MethodModel method = new MethodModel(name).setDesc(desc);
+            
+            m_methods.add(method);
+            return method;
+         }
+      }
+    </snippet>
   </entity>
   <entity name="inner-class">
     <attribute name="inner-name" value-type="String" key="true" />

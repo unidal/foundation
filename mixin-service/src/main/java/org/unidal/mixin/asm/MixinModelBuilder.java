@@ -209,11 +209,13 @@ public class MixinModelBuilder {
 
       @Override
       public void visitInnerClass(String name, String outerName, String innerName, int access) {
-         InnerClassModel innerClassModel = m_sourceModel.findOrCreateInnerClass(innerName);
+         if (m_sourceModel.getName().equals(outerName)) {
+            InnerClassModel innerClassModel = m_sourceModel.findOrCreateInnerClass(innerName);
 
-         innerClassModel.setAccess(access);
-         innerClassModel.setName(name);
-         innerClassModel.setOuterName(outerName);
+            innerClassModel.setAccess(access);
+            innerClassModel.setName(name);
+            innerClassModel.setOuterName(outerName);
+         }
       }
 
       @Override

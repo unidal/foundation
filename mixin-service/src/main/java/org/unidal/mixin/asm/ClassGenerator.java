@@ -359,7 +359,7 @@ public class ClassGenerator {
             }
 
             super.visitInsn(Opcodes.RETURN);
-            super.visitMaxs(m_maxStack + 100, m_maxLocals + 100); 
+            super.visitMaxs(m_maxStack + 100, m_maxLocals + 100);
             super.visitEnd();
          }
       }
@@ -483,7 +483,9 @@ public class ClassGenerator {
       public void visitInnerClass(String name, String outerName, String innerName, int access) {
          InnerClassModel innerClass = m_ctx.findInnerClass(innerName);
 
-         super.visitInnerClass(innerClass.getName(), innerClass.getOuterName(), innerName, access);
+         if (innerClass != null) {
+            super.visitInnerClass(innerClass.getName(), innerClass.getOuterName(), innerName, access);
+         }
       }
 
       @Override

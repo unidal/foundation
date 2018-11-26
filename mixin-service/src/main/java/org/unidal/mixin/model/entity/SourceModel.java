@@ -246,4 +246,27 @@ public class SourceModel extends BaseEntity<SourceModel> {
       return this;
    }
 
+   /********* Code Snippet Start *********/
+   public MethodModel findOrCreateMethod(String name, String desc) {
+      synchronized (m_methods) {
+         for (MethodModel method : m_methods) {
+            if (!equals(method.getName(), name)) {
+               continue;
+            }
+            
+            if (!equals(method.getDesc(), desc)) {
+               continue;
+            }
+            
+            return method;
+         }
+         
+         MethodModel method = new MethodModel(name).setDesc(desc);
+         
+         m_methods.add(method);
+         return method;
+      }
+   }      
+
+   /********* Code Snippet End *********/
 }

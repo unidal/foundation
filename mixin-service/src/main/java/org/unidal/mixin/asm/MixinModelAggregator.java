@@ -128,11 +128,12 @@ public class MixinModelAggregator extends BaseVisitor {
    @Override
    public void visitMethod(MethodModel method) {
       // build the map
-      List<MethodEntry> entries = m_methodMap.get(method.getName());
+      String key = method.getName() + method.getDesc();
+      List<MethodEntry> entries = m_methodMap.get(key);
 
       if (entries == null) {
          entries = new ArrayList<MethodEntry>();
-         m_methodMap.put(method.getName(), entries);
+         m_methodMap.put(key, entries);
       }
 
       MethodEntry entry = new MethodEntry(method);
@@ -144,21 +145,20 @@ public class MixinModelAggregator extends BaseVisitor {
       if (m_target != null) {
          for (MethodEntry e : entries) {
             String name = e.getName();
-            MethodModel m = m_target.findOrCreateMethod(name);
+            MethodModel m = m_target.findOrCreateMethod(name, method.getDesc());
 
             m.setAccess(e.getAccess());
-            m.setDesc(method.getDesc());
             m.setSuperName(e.getSuperName());
             m.setSourceName(method.getName());
             m.setSourceClass(e.getSourceClass());
          }
 
-         m_methodMap.remove(method.getName());
+         m_methodMap.remove(key);
       }
 
       // copy the source
       if (m_source != null) {
-         MethodModel m = m_source.findOrCreateMethod(method.getName());
+         MethodModel m = m_source.findOrCreateMethod(method.getName(), method.getDesc());
 
          m.mergeAttributes(method);
       }
@@ -222,7 +222,7 @@ public class MixinModelAggregator extends BaseVisitor {
       }
 
       public AccessHelper withSynthetic() {
-         //TODO m_access |= Opcodes.ACC_SYNTHETIC;
+         // TODO m_access |= Opcodes.ACC_SYNTHETIC;
          return this;
       }
    }
@@ -342,7 +342,7 @@ public class MixinModelAggregator extends BaseVisitor {
          if ("<clinit>".equals(m_method.getName()) || "<init>".equals(m_method.getName())) {
             return null;
          }
-         
+
          if (m_index == 0) {
             return concat("$_", m_method.getName());
          } else {

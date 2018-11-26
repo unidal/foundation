@@ -70,7 +70,7 @@ public class JarFileBuilder {
             throw new IllegalStateException("Error when adding to mixin jar for " + path, e);
          }
 
-         if ("true".equals(System.getProperty("MIXIN_DEBUG"))) {
+         if ("true".equals(System.getProperty("MIXIN_JARFILE_DEBUG"))) {
             PrintWriter pw = new PrintWriter(System.out);
 
             new ClassReader(content).accept(new TraceClassVisitor(null, new ASMifier(), pw), ClassReader.SKIP_DEBUG);

@@ -294,8 +294,8 @@ public class Scanners {
          }
       }
 
-      private void scan(Set<URL> done, final List<URL> urls, final URL base, String resourceBase, final ResourceMatcher matcher)
-            throws IOException {
+      private void scan(Set<URL> done, final List<URL> urls, final URL base, String resourceBase,
+            final ResourceMatcher matcher) throws IOException {
          if (done.contains(base)) {
             return;
          } else {
@@ -320,10 +320,14 @@ public class Scanners {
          Set<URL> done = new HashSet<URL>();
 
          // try to load from current class's classloader
-         Enumeration<URL> e1 = getClass().getClassLoader().getResources(resourceBase);
+         ClassLoader classLoader = getClass().getClassLoader();
 
-         while (e1.hasMoreElements()) {
-            scan(done, urls, e1.nextElement(), resourceBase, matcher);
+         if (classLoader != null) {
+            Enumeration<URL> e1 = classLoader.getResources(resourceBase);
+
+            while (e1.hasMoreElements()) {
+               scan(done, urls, e1.nextElement(), resourceBase, matcher);
+            }
          }
 
          // try to load from current context's classloader
@@ -413,8 +417,8 @@ public class Scanners {
          }
       }
 
-      private void scanZip(final List<URL> urls, final URL base, final String resourceBase, final ResourceMatcher matcher)
-            throws IOException {
+      private void scanZip(final List<URL> urls, final URL base, final String resourceBase,
+            final ResourceMatcher matcher) throws IOException {
          String path = base.getPath();
          int pos = path.lastIndexOf("!/");
          File jarFile = new File(path.substring("file:".length(), pos));

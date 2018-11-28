@@ -16,6 +16,7 @@
 	<modules>
 		<module>foundation-service</module>
 		<module>mixin-service</module>
+		<module>mixin-sample</module>
 	</modules>
 	<url>https://github.com/unidal/foundation</url>
 	<scm>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mixin>
+   <class class="sun.net.www.protocol.http.Handler">
+      <target name="sun/net/www/protocol/http/Handler">
+         <field access="4" name="proxy" desc="Ljava/lang/String;"/>
+         <field access="4" name="proxyPort" desc="I"/>
+         <method access="4" name="getDefaultPort" desc="()I"/>
+         <method access="1" name="&lt;init&gt;" desc="()V"/>
+         <method access="1" name="&lt;init&gt;" desc="(Ljava/lang/String;I)V"/>
+         <method access="4" name="openConnection" desc="(Ljava/net/URL;)Ljava/net/URLConnection;"/>
+         <method access="4" name="openConnection" desc="(Ljava/net/URL;Ljava/net/Proxy;)Ljava/net/URLConnection;"/>
+      </target>
+      <source name="org/unidal/mixin/sample/protocol/HttpHandlerMixin">
+         <method access="1" name="&lt;init&gt;" desc="()V"/>
+         <method access="4" name="openConnection" desc="(Ljava/net/URL;Ljava/net/Proxy;)Ljava/net/URLConnection;"/>
+         <inner-class access="10" name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper" outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin" inner-name="HttpURLConnectionWrapper"/>
+         <inner-class access="2" name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper$InputStreamWrapper" outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper" inner-name="InputStreamWrapper"/>
+      </source>
+   </class>
+</mixin>

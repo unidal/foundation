@@ -71,7 +71,7 @@
     </snippet>
   </entity>
   <entity name="inner-class">
-    <attribute name="inner-name" value-type="String" key="true" />
+    <attribute name="name" value-type="String" key="true" />
   </entity>
 </model>
 

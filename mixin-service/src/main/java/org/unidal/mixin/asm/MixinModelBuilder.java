@@ -141,6 +141,46 @@ public class MixinModelBuilder {
       m_classes.remove(mixinClass);
    }
 
+   private static class InnerClassBuilder extends ClassVisitor {
+      private SourceModel m_sourceModel;
+
+      private String m_outerName;
+
+      public InnerClassBuilder(SourceModel sourceModel, String name) {
+         super(Opcodes.ASM5);
+
+         m_sourceModel = sourceModel;
+         m_outerName = name;
+      }
+
+      public void build() {
+         try {
+            ClassReader reader = new ClassReader(m_outerName);
+            int flags = ClassReader.SKIP_FRAMES + ClassReader.SKIP_DEBUG + ClassReader.SKIP_CODE;
+            
+            reader.accept(this, flags);
+         } catch (Throwable e) {
+            e.printStackTrace();
+         }
+      }
+
+      @Override
+      public void visitInnerClass(String name, String outerName, String innerName, int access) {
+         if (!m_outerName.equals(name)) {
+            InnerClassModel innerClassModel = m_sourceModel.findInnerClass(name);
+
+            if (innerClassModel == null) {
+               innerClassModel = m_sourceModel.findOrCreateInnerClass(name);
+               innerClassModel.setAccess(access);
+               innerClassModel.setInnerName(innerName);
+               innerClassModel.setOuterName(outerName);
+
+               new InnerClassBuilder(m_sourceModel, name).build();
+            }
+         }
+      }
+   }
+
    private static class MixinMetaVisitor extends AnnotationVisitor {
       private AtomicReference<String> m_classNameRef;
 
@@ -210,11 +250,13 @@ public class MixinModelBuilder {
       @Override
       public void visitInnerClass(String name, String outerName, String innerName, int access) {
          if (m_sourceModel.getName().equals(outerName)) {
-            InnerClassModel innerClassModel = m_sourceModel.findOrCreateInnerClass(innerName);
+            InnerClassModel innerClassModel = m_sourceModel.findOrCreateInnerClass(name);
 
             innerClassModel.setAccess(access);
-            innerClassModel.setName(name);
+            innerClassModel.setInnerName(innerName);
             innerClassModel.setOuterName(outerName);
+
+            new InnerClassBuilder(m_sourceModel, name).build();
          }
       }
 

@@ -68,18 +68,18 @@ public class DefaultSaxMaker implements IMaker<Attributes> {
       String innerName = attributes.getValue(ATTR_INNER_NAME);
       String sourceName = attributes.getValue(ATTR_SOURCE_NAME);
       String sourceOuterName = attributes.getValue(ATTR_SOURCE_OUTER_NAME);
-      InnerClassModel innerClass = new InnerClassModel(innerName);
+      InnerClassModel innerClass = new InnerClassModel(name);
 
       if (access != null) {
          innerClass.setAccess(convert(Integer.class, access, null));
       }
 
-      if (name != null) {
-         innerClass.setName(name);
-      }
-
       if (outerName != null) {
          innerClass.setOuterName(outerName);
+      }
+
+      if (innerName != null) {
+         innerClass.setInnerName(innerName);
       }
 
       if (sourceName != null) {

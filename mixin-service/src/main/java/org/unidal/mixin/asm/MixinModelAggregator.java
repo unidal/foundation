@@ -108,16 +108,24 @@ public class MixinModelAggregator extends BaseVisitor {
    @Override
    public void visitInnerClass(InnerClassModel innerClass) {
       TargetModel target = m_classModel.getTarget();
-      InnerClassModel icm = target.findOrCreateInnerClass(innerClass.getInnerName());
+      InnerClassModel icm = target.findOrCreateInnerClass(innerClass.getName());
 
       icm.mergeAttributes(innerClass);
-      icm.setOuterName(target.getName());
-      icm.setName(target.getName() + "$" + icm.getInnerName());
-      icm.setSourceName(innerClass.getName());
-      icm.setSourceOuterName(m_source != null ? m_source.getName() : m_target.getName());
+
+      if (m_target != null) {
+         icm.setName(innerClass.getName());
+         icm.setOuterName(innerClass.getOuterName());
+         icm.setSourceName(innerClass.getName());
+         icm.setSourceOuterName(innerClass.getOuterName());
+      } else {
+         icm.setName(innerClass.getName().replace(m_source.getName(), target.getName()));
+         icm.setOuterName(innerClass.getOuterName().replace(m_source.getName(), target.getName()));
+         icm.setSourceName(innerClass.getName());
+         icm.setSourceOuterName(innerClass.getOuterName());
+      }
 
       if (m_source != null) { // copy
-         InnerClassModel ic = m_source.findOrCreateInnerClass(innerClass.getInnerName());
+         InnerClassModel ic = m_source.findOrCreateInnerClass(innerClass.getName());
 
          ic.mergeAttributes(innerClass);
       }

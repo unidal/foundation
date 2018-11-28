@@ -1,8 +1,11 @@
 package org.unidal.mixin;
 
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,18 +34,45 @@ public class ClassTransformer implements ClassFileTransformer {
       m_instrumentation = instrumentation;
    }
 
-   public synchronized void initialize() {
+   private synchronized void initialize() {
       if (!m_initialized.get()) {
          MixinModel soruce = m_builder.build();
          MixinModel aggregated = new MixinModelAggregator().aggregate(soruce);
-         JarFile jarfile = new JarFileBuilder(aggregated).build();
-
-         if (jarfile != null) {
-            m_instrumentation.appendToSystemClassLoaderSearch(jarfile);
-         }
 
          m_mixin = aggregated;
+         initializeClasspath();
          m_initialized.set(true);
+      }
+   }
+
+   private void initializeClasspath() {
+      JarFile jarfile = new JarFileBuilder(m_mixin).build();
+
+      if (jarfile != null) {
+         m_instrumentation.appendToBootstrapClassLoaderSearch(jarfile);
+      }
+
+      ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+      if (cl instanceof URLClassLoader) {
+         URL[] urls = ((URLClassLoader) cl).getURLs();
+
+         for (URL url : urls) {
+            String path = url.getPath();
+
+            if (path.endsWith(".jar")) {
+               if (path.contains("/jre/lib/") || path.contains("agent-") || path.contains("mixin-")
+                     || path.contains("/asm-") || path.contains("/junit-")) {
+                  continue;
+               }
+
+               try {
+                  m_instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(path));
+               } catch (IOException e) {
+                  e.printStackTrace();
+               }
+            }
+         }
       }
    }
 

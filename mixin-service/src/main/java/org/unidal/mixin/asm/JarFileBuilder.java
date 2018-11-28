@@ -11,6 +11,7 @@ import java.util.jar.JarOutputStream;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.ASMifier;
@@ -31,7 +32,7 @@ public class JarFileBuilder {
 
    public JarFile build() {
       try {
-         File tmpJar = File.createTempFile("mixin", ".jar");
+         File tmpJar = File.createTempFile("mixin-", ".jar");
          JarOutputStream out = new JarOutputStream(new FileOutputStream(tmpJar));
 
          tmpJar.deleteOnExit();
@@ -142,6 +143,13 @@ public class JarFileBuilder {
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
          return new MethodMigrator(m_model, cv, access, name, desc, signature, exceptions);
       }
+
+      @Override
+      public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+         desc = desc.replace(m_model.getSourceOuterName(), m_model.getOuterName());
+
+         return super.visitField(access, name, desc, signature, value);
+      }
    }
 
    private static class MethodMigrator extends MethodVisitor {
@@ -153,10 +161,10 @@ public class JarFileBuilder {
 
          m_model = model;
 
-         if ("<init>".equals(name)) {
-            String targetDesc = desc.replace(m_model.getSourceName(), m_model.getName());
+         desc = desc.replace(m_model.getSourceOuterName(), m_model.getOuterName());
 
-            super.mv = cv.visitMethod(access, name, targetDesc, signature, exceptions);
+         if ("<init>".equals(name)) {
+            super.mv = cv.visitMethod(access, name, desc, signature, exceptions);
          } else {
             super.mv = cv.visitMethod(access, name, desc, signature, exceptions);
          }
@@ -164,20 +172,37 @@ public class JarFileBuilder {
 
       @Override
       public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-         if (m_model.getSourceName().equals(owner)) {
-            super.visitFieldInsn(opcode, m_model.getName(), name, desc);
-         } else {
-            super.visitFieldInsn(opcode, owner, name, desc);
+         if (owner.contains(m_model.getSourceOuterName())) {
+            owner = owner.replace(m_model.getSourceOuterName(), m_model.getOuterName());
          }
+
+         if (desc.contains(m_model.getSourceOuterName())) {
+            desc = desc.replace(m_model.getSourceOuterName(), m_model.getOuterName());
+         }
+
+         super.visitFieldInsn(opcode, owner, name, desc);
       }
 
       @Override
       public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-         if (m_model.getSourceName().equals(owner)) {
-            super.visitMethodInsn(opcode, m_model.getName(), name, desc, itf);
-         } else {
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
+         if (owner.contains(m_model.getSourceOuterName())) {
+            owner = owner.replace(m_model.getSourceOuterName(), m_model.getOuterName());
          }
+
+         if (desc.contains(m_model.getSourceOuterName())) {
+            desc = desc.replace(m_model.getSourceOuterName(), m_model.getOuterName());
+         }
+
+         super.visitMethodInsn(opcode, owner, name, desc, itf);
+      }
+
+      @Override
+      public void visitTypeInsn(int opcode, String type) {
+         if (type.contains(m_model.getSourceOuterName())) {
+            type = type.replace(m_model.getSourceOuterName(), m_model.getOuterName());
+         }
+
+         super.visitTypeInsn(opcode, type);
       }
    }
 }

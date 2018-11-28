@@ -71,7 +71,7 @@ public class SunJdkAttacher {
          debug("Agent jar is %s", file.getCanonicalPath());
          return file.getCanonicalPath();
       } else { // directory
-         File tmpJar = File.createTempFile("agent", ".jar");
+         File tmpJar = File.createTempFile("agent-", ".jar");
          Manifest manifest = buildManifest(agentClass);
          JarOutputStream out = new JarOutputStream(new FileOutputStream(tmpJar), manifest);
 

@@ -158,6 +158,7 @@ public class ClassGenerator {
          }
       }
 
+      @Override
       public void visitTypeInsn(int opcode, String type) {
          switch (opcode) {
          case Opcodes.NEW:

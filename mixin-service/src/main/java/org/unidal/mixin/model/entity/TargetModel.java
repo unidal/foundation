@@ -73,9 +73,9 @@ public class TargetModel extends BaseEntity<TargetModel> {
       return null;
    }
 
-   public InnerClassModel findInnerClass(String innerName) {
+   public InnerClassModel findInnerClass(String name) {
       for (InnerClassModel innerClass : m_innerClasses) {
-         if (!equals(innerClass.getInnerName(), innerName)) {
+         if (!equals(innerClass.getName(), name)) {
             continue;
          }
 
@@ -114,17 +114,17 @@ public class TargetModel extends BaseEntity<TargetModel> {
       }
    }
 
-   public InnerClassModel findOrCreateInnerClass(String innerName) {
+   public InnerClassModel findOrCreateInnerClass(String name) {
       synchronized (m_innerClasses) {
          for (InnerClassModel innerClass : m_innerClasses) {
-            if (!equals(innerClass.getInnerName(), innerName)) {
+            if (!equals(innerClass.getName(), name)) {
                continue;
             }
 
             return innerClass;
          }
 
-         InnerClassModel innerClass = new InnerClassModel(innerName);
+         InnerClassModel innerClass = new InnerClassModel(name);
 
          m_innerClasses.add(innerClass);
          return innerClass;
@@ -195,13 +195,13 @@ public class TargetModel extends BaseEntity<TargetModel> {
       return null;
    }
 
-   public InnerClassModel removeInnerClass(String innerName) {
+   public InnerClassModel removeInnerClass(String name) {
       int len = m_innerClasses.size();
 
       for (int i = 0; i < len; i++) {
          InnerClassModel innerClass = m_innerClasses.get(i);
 
-         if (!equals(innerClass.getInnerName(), innerName)) {
+         if (!equals(innerClass.getName(), name)) {
             continue;
          }
 

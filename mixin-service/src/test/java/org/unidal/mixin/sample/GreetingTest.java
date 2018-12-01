@@ -44,17 +44,17 @@ public class GreetingTest {
    @Test
    public void testWithMixinAndMixin2() throws Exception {
       System.setProperty("MIXIN_DEBUG", "false");
-      
+
       s_mixins.add(getClass().getPackage().getName() + ".greeting.GreetingMixin");
       s_mixins.add(getClass().getPackage().getName() + ".greeting.GreetingMixin2");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      
+
       Greeting greeting = new Greeting();
-      
+
       Assert.assertEquals("sayHello: HELLO FRANKIE", greeting.sayHello("Frankie"));
       Assert.assertEquals("sayBye: bye frankie", greeting.sayBye("Frankie"));
    }
-   
+
    @Test
    public void testWithoutMixin() throws IOException {
       Greeting greeting = new Greeting();

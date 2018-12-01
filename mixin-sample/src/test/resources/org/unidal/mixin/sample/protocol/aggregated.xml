@@ -11,11 +11,13 @@
          <method access="4" name="openConnection" super-name="$_openConnection" source-name="openConnection" source-class="sun/net/www/protocol/http/Handler" desc="(Ljava/net/URL;)Ljava/net/URLConnection;"/>
          <method access="4" name="openConnection" super-name="$_openConnection" source-name="openConnection" source-class="org/unidal/mixin/sample/protocol/HttpHandlerMixin" desc="(Ljava/net/URL;Ljava/net/Proxy;)Ljava/net/URLConnection;"/>
          <method access="2" name="$_openConnection" super-name="$2_openConnection" source-name="openConnection" source-class="sun/net/www/protocol/http/Handler" desc="(Ljava/net/URL;Ljava/net/Proxy;)Ljava/net/URLConnection;"/>
+         <method access="2" name="getUrl" source-name="getUrl" source-class="org/unidal/mixin/sample/protocol/HttpHandlerMixin" desc="(Ljava/net/URL;)Ljava/lang/String;"/>
          <inner-class access="10" name="sun/net/www/protocol/http/Handler$HttpURLConnectionWrapper" outer-name="sun/net/www/protocol/http/Handler" inner-name="HttpURLConnectionWrapper" source-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper" source-outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin"/>
          <inner-class access="2" name="sun/net/www/protocol/http/Handler$HttpURLConnectionWrapper$InputStreamWrapper" outer-name="sun/net/www/protocol/http/Handler$HttpURLConnectionWrapper" inner-name="InputStreamWrapper" source-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper$InputStreamWrapper" source-outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper"/>
       </target>
       <source name="org/unidal/mixin/sample/protocol/HttpHandlerMixin">
          <method access="1" name="&lt;init&gt;" desc="()V"/>
+         <method access="2" name="getUrl" desc="(Ljava/net/URL;)Ljava/lang/String;"/>
          <method access="4" name="openConnection" desc="(Ljava/net/URL;Ljava/net/Proxy;)Ljava/net/URLConnection;"/>
          <inner-class access="10" name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper" outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin" inner-name="HttpURLConnectionWrapper"/>
          <inner-class access="2" name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper$InputStreamWrapper" outer-name="org/unidal/mixin/sample/protocol/HttpHandlerMixin$HttpURLConnectionWrapper" inner-name="InputStreamWrapper"/>

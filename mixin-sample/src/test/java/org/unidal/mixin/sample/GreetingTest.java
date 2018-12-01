@@ -10,6 +10,7 @@ public class GreetingTest {
    @Test
    public void testWithMixin() throws Exception {
       System.setProperty("MIXIN_DEBUG", "false");
+      System.setProperty("MIXIN_JARFILE_DEBUG", "false");
       new SunJdkAttacher().loadAgent(AgentMain.class);
 
       Greeting greeting = new Greeting();

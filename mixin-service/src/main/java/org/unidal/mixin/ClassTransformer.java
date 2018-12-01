@@ -99,6 +99,7 @@ public class ClassTransformer implements ClassFileTransformer {
             } else {
                byte[] result = new ClassGenerator(model, classfileBuffer).generate(isRedefine);
 
+               System.out.println(String.format("[Mixin] Class(%s) is transformed.", name));
                return result;
             }
          } catch (Throwable e) {

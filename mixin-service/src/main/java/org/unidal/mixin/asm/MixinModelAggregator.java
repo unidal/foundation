@@ -230,7 +230,7 @@ public class MixinModelAggregator extends BaseVisitor {
       }
 
       public AccessHelper withSynthetic() {
-         // TODO m_access |= Opcodes.ACC_SYNTHETIC;
+         m_access |= Opcodes.ACC_SYNTHETIC;
          return this;
       }
    }

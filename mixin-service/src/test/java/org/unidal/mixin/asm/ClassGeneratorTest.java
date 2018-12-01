@@ -25,6 +25,6 @@ public class ClassGeneratorTest {
          ClassPrinter.print(new ClassReader(result));
       }
 
-      Assert.assertEquals(2916, result.length);
+      Assert.assertEquals(2740, result.length);
    }
 }

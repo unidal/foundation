@@ -36,7 +36,7 @@ public class GreetingMixin2 {
       }
    }
 
-   private static class Helper {
+   public static class Helper {
       private String m_method;
 
       private String m_name;

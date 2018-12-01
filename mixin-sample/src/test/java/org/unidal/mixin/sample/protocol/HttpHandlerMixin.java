@@ -13,34 +13,38 @@ import java.util.Map;
 
 import org.unidal.cat.Cat;
 import org.unidal.cat.message.Message;
-import org.unidal.cat.message.MessageTree;
 import org.unidal.cat.message.Transaction;
 import org.unidal.cat.message.tree.ForkedTransaction;
 import org.unidal.cat.message.tree.MessageTreeHelper;
-import org.unidal.cat.message.tree.MyForkedTransaction;
 import org.unidal.mixin.MixinMeta;
 
 @MixinMeta(targetClassName = "sun.net.www.protocol.http.Handler")
 public class HttpHandlerMixin {
+   protected URLConnection $_openConnection(URL url, Proxy proxy) throws IOException {
+      return null;
+   }
+
+   private String getUrl(URL url) {
+      String str = url.toExternalForm();
+      int off = str.indexOf('?');
+
+      if (off > 0) {
+         return str.substring(0, off);
+      } else {
+         return str;
+      }
+   }
+
    protected URLConnection openConnection(URL url, Proxy proxy) throws IOException {
-      Transaction t = Cat.newTransaction("HTTP", url.toExternalForm());
-      MessageTree tree = MessageTreeHelper.context().getMessageTree();
-      String rootMessageId = tree.getRootMessageId();
-      String parentMessageId = tree.getMessageId();
-      String messageId = MessageTreeHelper.context().nextMessageId();
-
-      ForkedTransaction forked = new MyForkedTransaction(rootMessageId, parentMessageId);
-
-      forked.setMessageId(messageId);
-      t.addChild(forked);
-      MessageTreeHelper.context().attach(forked);
+      Transaction t = Cat.newTransaction("HTTP", getUrl(url));
+      ForkedTransaction forked = MessageTreeHelper.context().fork();
 
       try {
          HttpURLConnection conn = (HttpURLConnection) $_openConnection(url, proxy);
 
-         conn.setRequestProperty("X-CAT-ROOT-ID", rootMessageId != null ? rootMessageId : parentMessageId);
-         conn.setRequestProperty("X-CAT-PARENT-ID", parentMessageId);
-         conn.setRequestProperty("X-CAT-ID", messageId);
+         conn.setRequestProperty("X-CAT-ROOT-ID", forked.getRootMessageId());
+         conn.setRequestProperty("X-CAT-PARENT-ID", forked.getParentMessageId());
+         conn.setRequestProperty("X-CAT-ID", forked.getMessageId());
 
          return new HttpURLConnectionWrapper(conn, t);
       } catch (RuntimeException e) {
@@ -57,14 +61,11 @@ public class HttpHandlerMixin {
          throw e;
       } catch (Exception e) {
          t.setStatus(e);
+         t.complete();
          throw new RuntimeException(e);
       } finally {
          // No forked.close() here, otherwise it becomes Embedded instead of Forked
       }
-   }
-
-   protected URLConnection $_openConnection(URL url, Proxy proxy) throws IOException {
-      return null;
    }
 
    private static class HttpURLConnectionWrapper extends HttpURLConnection {
@@ -185,7 +186,13 @@ public class HttpHandlerMixin {
 
       public InputStream getInputStream() throws IOException {
          if (m_in == null) {
-            m_in = new InputStreamWrapper(m_conn.getInputStream());
+            try {
+               m_in = new InputStreamWrapper(m_conn.getInputStream());
+            } catch (IOException e) {
+               m_t.setStatus(e);
+               m_t.complete();
+               throw e;
+            }
          }
 
          return m_in;
@@ -290,10 +297,6 @@ public class HttpHandlerMixin {
             String contentEncoding = getContentEncoding();
             String contentType = getContentType();
             int statusCode = getResponseCode();
-
-            if (statusCode > 0) {
-               m_t.addData("status", statusCode);
-            }
 
             if (contentType != null) {
                m_t.addData("type", contentType);

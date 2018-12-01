@@ -277,12 +277,17 @@ public class ClassGenerator {
       }
 
       public String getTargetDesc(String desc) {
-         Type type = Type.getType(desc);
+         try {
+            Type type = Type.getType(desc);
+            String name = type.getInternalName();
 
-         for (SourceModel source : m_model.getSources()) {
-            if (source.getName().equals(type.getInternalName())) {
-               return Type.getObjectType(getTargetClass()).getDescriptor();
+            for (SourceModel source : m_model.getSources()) {
+               if (source.getName().equals(name)) {
+                  return Type.getObjectType(getTargetClass()).getDescriptor();
+               }
             }
+         } catch (Exception e) {
+            // ignore it
          }
 
          return desc;

@@ -136,6 +136,7 @@ public class SunJdkAttacher {
          // 3. load agent
          String agentJarPath = getAgentJarPath(agentClass);
 
+         System.setProperty("agent.jar.path", agentJarPath);
          vm.getClass().getMethod("loadAgent", String.class).invoke(vm, agentJarPath);
          debug("Java Agent loaded");
       } catch (Exception e) {

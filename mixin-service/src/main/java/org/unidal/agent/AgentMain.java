@@ -1,13 +1,10 @@
 package org.unidal.agent;
 
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.jar.JarFile;
 
-import org.unidal.mixin.ClassTransformer;
-
 /**
- * This agent class will be loaded in the bootstrap classloader or by SunJdkAttacher.loadAgent().
+ * This agent class will be loaded in the bootstrap class loader or by SunJdkAttacher.loadAgent().
  */
 public class AgentMain {
    private static Instrumentation s_instrumentation;
@@ -27,9 +24,9 @@ public class AgentMain {
       if (agentJarPath != null) {
          try {
             instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(agentJarPath));
-         } catch (IOException e) {
-            e.printStackTrace();
+         } catch (Exception e) {
             // ignore it
+            e.printStackTrace();
          }
       }
 

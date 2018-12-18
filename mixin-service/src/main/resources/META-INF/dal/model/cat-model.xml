@@ -16,10 +16,12 @@
   <entity name="transaction">
     <attribute name="type" value-type="String" />
     <attribute name="name" value-type="String" />
+    <element name="key" value-type="String" type="list" names="keys" />
   </entity>
   <entity name="event">
     <attribute name="type" value-type="String" />
     <attribute name="name" value-type="String" />
+    <element name="key" value-type="String" type="list" names="keys" />
   </entity>
 </model>
 

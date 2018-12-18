@@ -1,6 +1,7 @@
 package org.unidal.agent.cat.asm;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -76,6 +77,8 @@ public class CatClassGenerator {
 
       private Type m_returnType;
 
+      private int m_variables;
+
       public LocalVariables(String desc) {
          m_argumentTypes = Type.getArgumentTypes(desc);
          m_returnType = Type.getReturnType(desc);
@@ -89,12 +92,28 @@ public class CatClassGenerator {
          return m_returnType.getSize() > 0;
       }
 
-      public int indexOfReturn() {
+      public int indexOfResult() {
          return getArgumentSize() + 2;
       }
 
       public int indexOfTransaction() {
          return getArgumentSize() + 1;
+      }
+
+      public int indexOfReturn() {
+         return indexOfResult() + m_variables;
+      }
+
+      public int indexOf(String expr) {
+         if (expr.equals("${return}")) {
+            return indexOfResult();
+         } else if (expr.startsWith("${arg") && expr.endsWith("}")) {
+            int index = Integer.parseInt(expr.substring("${arg".length(), expr.length() - 1));
+
+            return index + 1;
+         }
+
+         throw new IllegalArgumentException(String.format("Unknown expression(%s)!", expr));
       }
    }
 
@@ -171,6 +190,10 @@ public class CatClassGenerator {
       public String getTransactionName() {
          return m_method.getTransaction().getName();
       }
+
+      public MethodModel getMethod() {
+         return m_method;
+      }
    }
 
    private static class MethodWrapperForTransaction extends MethodVisitor implements Opcodes {
@@ -214,20 +237,23 @@ public class CatClassGenerator {
          LocalVariables lvs = m_ctx.getLocalVariables();
 
          if (lvs.hasReturn()) {
-            mv.visitVarInsn(ASTORE, lvs.indexOfReturn());
+            mv.visitVarInsn(ASTORE, lvs.indexOfResult());
          }
 
-         mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
-         mv.visitLdcInsn("name");
-         mv.visitVarInsn(ALOAD, 1);
-         mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "addData",
-               "(Ljava/lang/String;Ljava/lang/Object;)V", true);
+         MethodModel method = m_ctx.getMethod();
+         List<String> keys = method.getTransaction().getKeys();
+         List<String> values = method.getTransaction().getValues();
+         int index = 0;
 
-         mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
-         mv.visitLdcInsn("return");
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "addData",
-               "(Ljava/lang/String;Ljava/lang/Object;)V", true);
+         for (String key : keys) {
+            String value = values.get(index++);
+
+            mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
+            mv.visitLdcInsn(key);
+            mv.visitVarInsn(ALOAD, lvs.indexOf(value));
+            mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "addData",
+                  "(Ljava/lang/String;Ljava/lang/Object;)V", true);
+         }
 
          mv.visitLdcInsn("200");
          mv.visitVarInsn(ALOAD, 3);
@@ -260,13 +286,14 @@ public class CatClassGenerator {
          mv.visitVarInsn(ALOAD, 1);
          mv.visitMethodInsn(INVOKESTATIC, m_ctx.getBinaryCat(), "logEvent", "(Ljava/lang/String;Ljava/lang/String;)V",
                false);
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitVarInsn(ASTORE, 5);
+
+         mv.visitVarInsn(ALOAD, lvs.indexOfResult());
+         mv.visitVarInsn(ASTORE, lvs.indexOfReturn());
          mv.visitLabel(m_bizEnd);
 
-         mv.visitVarInsn(ALOAD, 2);
+         mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
          mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "complete", "()V", true);
-         mv.visitVarInsn(ALOAD, 5);
+         mv.visitVarInsn(ALOAD, lvs.indexOfReturn());
       }
 
       private void buildBeforeTryClause() {

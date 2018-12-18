@@ -2,7 +2,7 @@
 package org.unidal.agent.cat.model.transform;
 
 import static org.unidal.agent.cat.model.Constants.ELEMENT_KEY;
-import static org.unidal.agent.cat.model.Constants.ELEMENT_KEIES;
+import static org.unidal.agent.cat.model.Constants.ELEMENT_KEYS;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_SUCCESS;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_SUCCESSES;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_VALUE;
@@ -214,7 +214,7 @@ public class DefaultSaxParser extends DefaultHandler {
    }
 
    private void parseForEvent(EventModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
-      if (ELEMENT_KEIES.equals(qName) || ELEMENT_KEY.equals(qName) || ELEMENT_VALUES.equals(qName) || ELEMENT_VALUE.equals(qName) || ELEMENT_SUCCESSES.equals(qName) || ELEMENT_SUCCESS.equals(qName)) {
+      if (ELEMENT_KEYS.equals(qName) || ELEMENT_KEY.equals(qName) || ELEMENT_VALUES.equals(qName) || ELEMENT_VALUE.equals(qName) || ELEMENT_SUCCESSES.equals(qName) || ELEMENT_SUCCESS.equals(qName)) {
          m_objs.push(parentObj);
       } else {
          throw new SAXException(String.format("Element(%s) is not expected under event!", qName));
@@ -255,7 +255,7 @@ public class DefaultSaxParser extends DefaultHandler {
    }
 
    private void parseForTransaction(TransactionModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
-      if (ELEMENT_KEIES.equals(qName) || ELEMENT_KEY.equals(qName) || ELEMENT_VALUES.equals(qName) || ELEMENT_VALUE.equals(qName) || ELEMENT_SUCCESSES.equals(qName) || ELEMENT_SUCCESS.equals(qName)) {
+      if (ELEMENT_KEYS.equals(qName) || ELEMENT_KEY.equals(qName) || ELEMENT_VALUES.equals(qName) || ELEMENT_VALUE.equals(qName) || ELEMENT_SUCCESSES.equals(qName) || ELEMENT_SUCCESS.equals(qName)) {
          m_objs.push(parentObj);
       } else {
          throw new SAXException(String.format("Element(%s) is not expected under transaction!", qName));

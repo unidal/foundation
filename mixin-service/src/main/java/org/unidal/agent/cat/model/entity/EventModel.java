@@ -12,7 +12,7 @@ public class EventModel extends BaseEntity<EventModel> {
 
    private String m_name;
 
-   private List<String> m_keies = new ArrayList<String>();
+   private List<String> m_keys = new ArrayList<String>();
 
    private List<String> m_values = new ArrayList<String>();
 
@@ -27,7 +27,7 @@ public class EventModel extends BaseEntity<EventModel> {
    }
 
    public EventModel addKey(String key) {
-      m_keies.add(key);
+      m_keys.add(key);
       return this;
    }
 
@@ -54,7 +54,7 @@ public class EventModel extends BaseEntity<EventModel> {
             return false;
          }
 
-         if (!equals(getKeies(), _o.getKeies())) {
+         if (!equals(getKeys(), _o.getKeys())) {
             return false;
          }
 
@@ -73,8 +73,8 @@ public class EventModel extends BaseEntity<EventModel> {
       return false;
    }
 
-   public List<String> getKeies() {
-      return m_keies;
+   public List<String> getKeys() {
+      return m_keys;
    }
 
    public String getName() {
@@ -99,7 +99,7 @@ public class EventModel extends BaseEntity<EventModel> {
 
       hash = hash * 31 + (m_type == null ? 0 : m_type.hashCode());
       hash = hash * 31 + (m_name == null ? 0 : m_name.hashCode());
-      for (String e : m_keies) {
+      for (String e : m_keys) {
          hash = hash * 31 + (e == null ? 0 :e.hashCode());
       }
 

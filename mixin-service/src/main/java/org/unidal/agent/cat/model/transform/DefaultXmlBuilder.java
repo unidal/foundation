@@ -285,8 +285,8 @@ public class DefaultXmlBuilder implements IVisitor {
    public void visitEvent(EventModel event) {
       startTag(ENTITY_EVENT, null, ATTR_TYPE, event.getType(), ATTR_NAME, event.getName());
 
-      if (!event.getKeies().isEmpty()) {
-         for (String key : event.getKeies()) {
+      if (!event.getKeys().isEmpty()) {
+         for (String key : event.getKeys()) {
             tagWithText(ELEMENT_KEY, key);
          }
       }
@@ -338,8 +338,8 @@ public class DefaultXmlBuilder implements IVisitor {
    public void visitTransaction(TransactionModel transaction) {
       startTag(ENTITY_TRANSACTION, null, ATTR_TYPE, transaction.getType(), ATTR_NAME, transaction.getName());
 
-      if (!transaction.getKeies().isEmpty()) {
-         for (String key : transaction.getKeies()) {
+      if (!transaction.getKeys().isEmpty()) {
+         for (String key : transaction.getKeys()) {
             tagWithText(ELEMENT_KEY, key);
          }
       }

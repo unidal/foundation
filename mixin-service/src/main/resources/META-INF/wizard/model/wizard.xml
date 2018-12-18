@@ -3,4 +3,7 @@
    <model package="org.unidal.agent.mixin.model" name="mixin">
       <sample-model>src/test/resources/org/unidal/agent/mixin/mixin.xml</sample-model>
    </model>
+   <model package="org.unidal.agent.cat.model" name="cat">
+      <sample-model>src/test/resources/org/unidal/agent/cat/cat.xml</sample-model>
+   </model>
 </wizard>

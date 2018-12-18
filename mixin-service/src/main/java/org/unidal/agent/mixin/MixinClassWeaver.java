@@ -7,11 +7,10 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.unidal.agent.ClassWeaver;
-import org.unidal.agent.mixin.asm.ClassGenerator;
-import org.unidal.agent.mixin.asm.JarFileBuilder;
-import org.unidal.agent.mixin.asm.MixinModelAggregator;
-import org.unidal.agent.mixin.asm.MixinModelBuilder;
+import org.unidal.agent.mixin.asm.MixinClassGenerator;
+import org.unidal.agent.mixin.asm.MixinJarFileBuilder;
 import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 
@@ -24,7 +23,7 @@ public class MixinClassWeaver implements ClassWeaver {
    public JarFile initialize() {
       MixinModel soruce = m_builder.build();
       MixinModel aggregated = new MixinModelAggregator().aggregate(soruce);
-      JarFile jarFile = new JarFileBuilder(aggregated).build();
+      JarFile jarFile = new MixinJarFileBuilder(aggregated).build();
 
       m_mixin = aggregated;
       return jarFile;
@@ -57,7 +56,7 @@ public class MixinClassWeaver implements ClassWeaver {
    @Override
    public byte[] weave(String className, byte[] classfileBuffer, boolean redefined) throws IOException {
       ClassModel model = m_mixin.findClass(className);
-      byte[] result = new ClassGenerator(model, classfileBuffer).generate(redefined);
+      byte[] result = new MixinClassGenerator(model, classfileBuffer).generate(redefined);
 
       System.out.println(String.format("[Mixin] Class(%s) is transformed.", className));
       return result;
@@ -66,12 +65,8 @@ public class MixinClassWeaver implements ClassWeaver {
    private static class MixinMetaRecognizer extends ClassVisitor {
       private boolean m_found;
 
-      private String m_targetDesc;
-
       public MixinMetaRecognizer() {
          super(Opcodes.ASM5);
-
-         m_targetDesc = "L" + MixinMeta.class.getName().replace('.', '/') + ";";
       }
 
       public boolean isFound() {
@@ -80,7 +75,9 @@ public class MixinClassWeaver implements ClassWeaver {
 
       @Override
       public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-         if (desc.equals(m_targetDesc)) {
+         Type type = Type.getType(desc);
+
+         if (MixinMeta.class.getName().equals(type.getClassName())) {
             m_found = true;
          }
 

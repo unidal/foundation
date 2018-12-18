@@ -23,12 +23,12 @@ import org.unidal.agent.mixin.model.entity.MethodModel;
 import org.unidal.agent.mixin.model.entity.SourceModel;
 import org.unidal.agent.mixin.model.entity.TargetModel;
 
-public class ClassGenerator {
+public class MixinClassGenerator {
    private Context m_ctx;
 
    private ClassReader m_base;
 
-   public ClassGenerator(ClassModel model, byte[] classfileBuffer) {
+   public MixinClassGenerator(ClassModel model, byte[] classfileBuffer) {
       m_ctx = new Context(model, classfileBuffer);
       m_base = new ClassReader(classfileBuffer);
    }

@@ -23,10 +23,10 @@ import org.unidal.agent.mixin.model.entity.SourceModel;
 import org.unidal.agent.mixin.model.entity.TargetModel;
 import org.unidal.agent.mixin.model.transform.BaseVisitor;
 
-public class JarFileBuilder {
+public class MixinJarFileBuilder {
    private MixinModel m_model;
 
-   public JarFileBuilder(MixinModel model) {
+   public MixinJarFileBuilder(MixinModel model) {
       m_model = model;
    }
 

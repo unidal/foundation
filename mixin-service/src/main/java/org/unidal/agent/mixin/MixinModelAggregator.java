@@ -1,4 +1,4 @@
-package org.unidal.agent.mixin.asm;
+package org.unidal.agent.mixin;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

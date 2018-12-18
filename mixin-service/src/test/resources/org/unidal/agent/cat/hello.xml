@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+   <class name="org.unidal.agent.cat.sample.hello.HelloService" enabled="true">
+      <method name="hello" desc="(Ljava/lang/String;)Ljava/lang/String;">
+         <transaction type="Service" name="hello">
+            <key>name</key>
+            <key>return</key>
+            <value>${arg0}</value>
+            <value>${return}</value>
+         </transaction>
+         <event type="Guest" name="${arg0}">
+         </event>
+      </method>
+   </class>
+</root>

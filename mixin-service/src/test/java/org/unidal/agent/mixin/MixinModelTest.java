@@ -1,4 +1,4 @@
-package org.unidal.agent.mixin.asm;
+package org.unidal.agent.mixin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
 public class MixinModelTest {
    @Test
    public void test() throws SAXException, IOException {
-      InputStream in = getClass().getResourceAsStream("../mixin.xml");
+      InputStream in = getClass().getResourceAsStream("mixin.xml");
       String expected = Files.forIO().readUtf8String(in);
       MixinModel actual = DefaultSaxParser.parse(expected);
 

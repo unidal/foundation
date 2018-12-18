@@ -6,11 +6,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class ClassPrinter extends DefaultHandler {
+public class ClassXmlPrinter extends DefaultHandler {
    private int m_depth;
 
    public static void print(ClassReader reader) {
-      reader.accept(new SAXClassAdapter(new ClassPrinter(), false), ClassReader.SKIP_DEBUG + ClassReader.SKIP_FRAMES);
+      reader.accept(new SAXClassAdapter(new ClassXmlPrinter(), false), ClassReader.SKIP_DEBUG + ClassReader.SKIP_FRAMES);
    }
 
    @Override

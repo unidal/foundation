@@ -1,4 +1,4 @@
-package org.unidal.agent.mixin.asm;
+package org.unidal.agent.mixin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
-import org.unidal.agent.mixin.MixinMeta;
 import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.FieldModel;
 import org.unidal.agent.mixin.model.entity.InnerClassModel;

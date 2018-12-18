@@ -27,6 +27,7 @@
 	</scm>
 	<properties>
 		<asm.version>5.2</asm.version>
+      <cat.version>2.0.0</cat.version>
 		<junit.version>4.12</junit.version>
 		<log4j.version>1.2.17</log4j.version>
 
@@ -50,6 +51,11 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
             <version>${asm.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.unidal.cat</groupId>
+            <artifactId>cat</artifactId>
+            <version>${cat.version}</version>
          </dependency>
 			<dependency>
 				<groupId>junit</groupId>

@@ -3,24 +3,15 @@ package org.unidal.agent;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.unidal.agent.mixin.asm.ClassGeneratorTest;
-import org.unidal.agent.mixin.asm.MixinModelAggregatorTest;
-import org.unidal.agent.mixin.asm.MixinModelBuilderTest;
-import org.unidal.agent.mixin.asm.MixinModelTest;
-import org.unidal.agent.mixin.sample.GreetingTest;
+import org.unidal.agent.cat.AllCatTests;
+import org.unidal.agent.mixin.AllMixinTests;
 
 @RunWith(Suite.class)
 @SuiteClasses({
 
-      MixinModelTest.class,
+      AllMixinTests.class,
 
-      MixinModelBuilderTest.class,
-
-      MixinModelAggregatorTest.class,
-
-      ClassGeneratorTest.class,
-
-      GreetingTest.class,
+      AllCatTests.class,
 
 })
 public class AllTests {

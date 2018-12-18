@@ -21,6 +21,11 @@
          <optional>true</optional>
       </dependency>
       <dependency>
+         <groupId>org.unidal.cat</groupId>
+         <artifactId>cat</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <scope>test</scope>
@@ -62,6 +67,7 @@
                   <configuration>
                      <manifest><![CDATA[
                         ${basedir}/src/main/resources/META-INF/dal/model/mixin-manifest.xml,
+                        ${basedir}/src/main/resources/META-INF/dal/model/cat-manifest.xml,
                      ]]></manifest>
                   </configuration>
                </execution>

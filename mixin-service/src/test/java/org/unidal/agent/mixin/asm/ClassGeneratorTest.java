@@ -5,26 +5,26 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
-import org.unidal.agent.mixin.asm.ClassGenerator;
-import org.unidal.agent.mixin.asm.ClassPrinter;
+import org.unidal.agent.mixin.asm.MixinClassGenerator;
+import org.unidal.agent.mixin.asm.ClassXmlPrinter;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.transform.DefaultSaxParser;
 import org.unidal.agent.mixin.sample.greeting.Greeting;
 import org.unidal.helper.Files;
 
 public class ClassGeneratorTest {
-   private static boolean DEBUG = true;
+   private static boolean DEBUG = false;
 
    @Test
    public void test() throws Exception {
-      MixinModel model = DefaultSaxParser.parse(getClass().getResourceAsStream("greeting2.xml"));
+      MixinModel model = DefaultSaxParser.parse(getClass().getResourceAsStream("../greeting2.xml"));
       String name = Greeting.class.getName();
       InputStream in = getClass().getResourceAsStream("/" + name.replace('.', '/') + ".class");
       byte[] bytes = Files.forIO().readFrom(in);
-      byte[] result = new ClassGenerator(model.findClass(name), bytes).generate(false);
+      byte[] result = new MixinClassGenerator(model.findClass(name), bytes).generate(false);
 
       if (DEBUG) {
-         ClassPrinter.print(new ClassReader(result));
+         ClassXmlPrinter.print(new ClassReader(result));
       }
 
       Assert.assertEquals(2776, result.length);

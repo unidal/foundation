@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -14,6 +15,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.unidal.agent.cat.CatEnabled;
+import org.unidal.agent.cat.CatEvent;
+import org.unidal.agent.cat.CatTransaction;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
@@ -60,6 +64,17 @@ public class CatClassGenerator {
          super(Opcodes.ASM5, ctx.getClassVisitor());
 
          m_ctx = ctx;
+      }
+
+      @Override
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+         Type type = Type.getType(desc);
+
+         if (CatEnabled.class.getName().equals(type.getClassName())) {
+            return null; // delete it
+         }
+
+         return super.visitAnnotation(desc, visible);
       }
 
       @Override
@@ -432,7 +447,11 @@ public class CatClassGenerator {
       public int indexOfNext() {
          m_newVariables++;
 
-         return getArgumentSize() + 2 + m_newVariables + (hasReturn() ? 1 : 0);
+         if (hasReturn()) {
+            return getArgumentSize() + 3 + m_newVariables;
+         } else {
+            return getArgumentSize() + 2 + m_newVariables;
+         }
       }
 
       public int indexOfResult() {
@@ -549,6 +568,17 @@ public class CatClassGenerator {
             m_ctx.eventIfHave();
             lvs.loadResultIfHave();
          }
+      }
+
+      @Override
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+         Type type = Type.getType(desc);
+
+         if (CatEvent.class.getName().equals(type.getClassName())) {
+            return null; // delete it
+         }
+
+         return super.visitAnnotation(desc, visible);
       }
 
       @Override
@@ -739,6 +769,19 @@ public class CatClassGenerator {
       public void visitCode() {
          super.visitCode();
          buildBeforeTryClause();
+      }
+
+      @Override
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+         Type type = Type.getType(desc);
+
+         if (CatTransaction.class.getName().equals(type.getClassName())) {
+            return null; // delete it
+         } else if (CatEvent.class.getName().equals(type.getClassName())) {
+            return null; // delete it
+         }
+
+         return super.visitAnnotation(desc, visible);
       }
 
       @Override

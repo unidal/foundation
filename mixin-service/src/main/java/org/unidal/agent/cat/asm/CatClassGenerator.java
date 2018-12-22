@@ -1,6 +1,7 @@
 package org.unidal.agent.cat.asm;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectweb.asm.ClassReader;
@@ -14,7 +15,9 @@ import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.unidal.agent.cat.model.entity.ClassModel;
+import org.unidal.agent.cat.model.entity.EventModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
+import org.unidal.agent.cat.model.entity.TransactionModel;
 import org.unidal.cat.Cat;
 import org.unidal.cat.message.Transaction;
 
@@ -33,7 +36,7 @@ public class CatClassGenerator {
 
       byte[] bytes = m_ctx.getByteArray();
 
-      if ("true".equals(System.getProperty("CAT_DEBUG"))) {
+      if (isDebug()) {
          System.out.println(m_ctx.getClassModel());
          // ClassPrinter.print(new ClassReader(bytes));
 
@@ -43,6 +46,10 @@ public class CatClassGenerator {
       }
 
       return bytes;
+   }
+
+   private static boolean isDebug() {
+      return "true".equals(System.getProperty("CAT_DEBUG"));
    }
 
    private static class ClassWrapper extends ClassVisitor {
@@ -59,10 +66,17 @@ public class CatClassGenerator {
          MethodModel method = m_ctx.findMethod(name, desc);
 
          if (method != null) {
+            if (isDebug()) {
+               System.out.println(String.format("Visit %s%s of %s ...", name, desc, m_ctx.getClassModel().getName()));
+            }
+
             if (method.getTransaction() != null) {
+               MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
+
                m_ctx.setMethod(method);
-               m_ctx.setLocalVariables(new LocalVariables(desc));
-               return new MethodWrapperForTransaction(m_ctx, access, name, desc, signature, exceptions);
+               m_ctx.setLocalVariables(new LocalVariables(mv, desc, exceptions));
+               m_ctx.setExpressions(new Expressions(m_ctx, mv));
+               return new MethodWrapperForTransaction(m_ctx, mv);
             } else {
                // TODO
             }
@@ -72,16 +86,33 @@ public class CatClassGenerator {
       }
    }
 
-   private static class LocalVariables {
+   private static class LocalVariables implements Opcodes {
+      private MethodVisitor m_mv;
+
       private Type[] m_argumentTypes;
 
       private Type m_returnType;
 
-      private int m_variables;
+      private int m_newVariables;
 
-      public LocalVariables(String desc) {
+      private List<String> m_exceptions = new ArrayList<String>();
+
+      public LocalVariables(MethodVisitor mv, String desc, String[] exceptions) {
+         m_mv = mv;
          m_argumentTypes = Type.getArgumentTypes(desc);
          m_returnType = Type.getReturnType(desc);
+
+         if (exceptions != null) {
+            for (String exception : exceptions) {
+               if (exception.equals("java/lang/RuntimeException")) {
+                  continue;
+               } else if (exception.equals("java/lang/Error")) {
+                  continue;
+               }
+
+               m_exceptions.add(exception);
+            }
+         }
       }
 
       public int getArgumentSize() {
@@ -100,20 +131,103 @@ public class CatClassGenerator {
          return getArgumentSize() + 1;
       }
 
-      public int indexOfReturn() {
-         return indexOfResult() + m_variables;
+      public int indexOfException() {
+         return indexOfTransaction() + 1;
       }
 
-      public int indexOf(String expr) {
-         if (expr.equals("${return}")) {
-            return indexOfResult();
-         } else if (expr.startsWith("${arg") && expr.endsWith("}")) {
-            int index = Integer.parseInt(expr.substring("${arg".length(), expr.length() - 1));
+      public int indexOfNext() {
+         m_newVariables++;
 
-            return index + 1;
+         return getArgumentSize() + 2 + m_newVariables + (hasReturn() ? 1 : 0);
+      }
+
+      public int getNewVariables() {
+         return m_newVariables;
+      }
+
+      public Type[] getArgumentTypes() {
+         return m_argumentTypes;
+      }
+
+      public void storeResult() {
+         int index = indexOfResult();
+
+         switch (m_returnType.getSort()) {
+         case Type.VOID:
+            break;
+         case Type.BOOLEAN:
+         case Type.CHAR:
+         case Type.BYTE:
+         case Type.SHORT:
+         case Type.INT:
+            m_mv.visitVarInsn(ISTORE, index);
+            break;
+         case Type.FLOAT:
+            m_mv.visitVarInsn(FSTORE, index);
+            break;
+         case Type.LONG:
+            m_mv.visitVarInsn(LSTORE, index);
+            break;
+         case Type.DOUBLE:
+            m_mv.visitVarInsn(DSTORE, index);
+            break;
+         default:
+            m_mv.visitVarInsn(ASTORE, index);
+            break;
          }
+      }
 
-         throw new IllegalArgumentException(String.format("Unknown expression(%s)!", expr));
+      public void loadResult() {
+         int index = indexOfResult();
+
+         switch (m_returnType.getSort()) {
+         case Type.VOID:
+            break;
+         case Type.BOOLEAN:
+         case Type.CHAR:
+         case Type.BYTE:
+         case Type.SHORT:
+         case Type.INT:
+            m_mv.visitVarInsn(ILOAD, index);
+            break;
+         case Type.FLOAT:
+            m_mv.visitVarInsn(FLOAD, index);
+            break;
+         case Type.LONG:
+            m_mv.visitVarInsn(LLOAD, index);
+            break;
+         case Type.DOUBLE:
+            m_mv.visitVarInsn(DLOAD, index);
+            break;
+         default:
+            m_mv.visitVarInsn(ALOAD, index);
+            break;
+         }
+      }
+
+      public void loadTransaction() {
+         m_mv.visitVarInsn(ALOAD, indexOfTransaction());
+      }
+
+      public void storeTransaction() {
+         m_mv.visitVarInsn(ASTORE, indexOfTransaction());
+      }
+
+      public void storeException() {
+         m_mv.visitVarInsn(ASTORE, indexOfException());
+      }
+
+      public void loadException() {
+         m_mv.visitVarInsn(ALOAD, indexOfException());
+      }
+
+      public void throwException() {
+         m_mv.visitVarInsn(ALOAD, indexOfException());
+         m_mv.visitInsn(ATHROW);
+      }
+
+      public List<String> getExceptions() {
+         return m_exceptions;
       }
    }
 
@@ -128,9 +242,15 @@ public class CatClassGenerator {
 
       private LocalVariables m_localVariables;
 
+      private Expressions m_expressions;
+
       public Context(ClassModel model, byte[] classfileBuffer) {
          m_model = model;
          m_writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+      }
+
+      public void setExpressions(Expressions expressions) {
+         m_expressions = expressions;
       }
 
       public void setMethod(MethodModel method) {
@@ -194,12 +314,84 @@ public class CatClassGenerator {
       public MethodModel getMethod() {
          return m_method;
       }
+
+      public void prepare(String key) {
+         m_expressions.eval(key);
+      }
+
+      public Object[] getLocalTypes() {
+         Object[] types = new Object[m_localVariables.indexOfTransaction() + 1];
+         int index = 1;
+
+         types[0] = getBinaryClassName();
+
+         for (Type type : m_localVariables.getArgumentTypes()) {
+            switch (type.getSort()) {
+            case Type.BOOLEAN:
+            case Type.CHAR:
+            case Type.BYTE:
+            case Type.SHORT:
+            case Type.INT:
+               types[index] = Opcodes.INTEGER;
+               break;
+            case Type.FLOAT:
+               types[index] = Opcodes.FLOAT;
+               break;
+            case Type.LONG:
+               types[index] = Opcodes.LONG;
+               break;
+            case Type.DOUBLE:
+               types[index] = Opcodes.DOUBLE;
+               break;
+            case Type.ARRAY:
+               types[index] = type.getDescriptor();
+               break;
+            case Type.OBJECT:
+            default:
+               types[index] = type.getInternalName();
+               break;
+            }
+
+            index++;
+         }
+
+         types[m_localVariables.indexOfTransaction()] = getBinaryTransaction();
+         return types;
+      }
+   }
+
+   private static class Expressions implements Opcodes {
+      private Context m_ctx;
+
+      private MethodVisitor m_mv;
+
+      private LocalVariables m_lvs;
+
+      public Expressions(Context ctx, MethodVisitor mv) {
+         m_ctx = ctx;
+         m_mv = mv;
+         m_lvs = ctx.getLocalVariables();
+      }
+
+      public void eval(String expr) {
+         if (expr.equals("${return}")) {
+            if (m_lvs.hasReturn()) {
+               m_mv.visitVarInsn(ALOAD, m_lvs.indexOfResult());
+            } else {
+               m_mv.visitInsn(ACONST_NULL);
+            }
+         } else if (expr.startsWith("${arg") && expr.endsWith("}")) {
+            int index = Integer.parseInt(expr.substring("${arg".length(), expr.length() - 1));
+
+            m_mv.visitVarInsn(ALOAD, index + 1);
+         } else {
+            m_mv.visitLdcInsn(expr);
+         }
+      }
    }
 
    private static class MethodWrapperForTransaction extends MethodVisitor implements Opcodes {
       private Context m_ctx;
-
-      private String[] m_exceptions;
 
       private Label m_bizStart;
 
@@ -213,17 +405,16 @@ public class CatClassGenerator {
 
       private Label m_finallyHandler;
 
+      private boolean m_return;
+
       private int m_maxStack;
 
       private int m_maxLocals;
 
-      public MethodWrapperForTransaction(Context ctx, int access, String name, String desc, String signature,
-            String[] exceptions) {
-         super(Opcodes.ASM5);
+      public MethodWrapperForTransaction(Context ctx, MethodVisitor mv) {
+         super(Opcodes.ASM5, mv);
 
          m_ctx = ctx;
-         m_exceptions = exceptions;
-         super.mv = m_ctx.getClassVisitor().visitMethod(access, name, desc, signature, exceptions);
       }
 
       private void buildAfterReturnClause() {
@@ -236,166 +427,174 @@ public class CatClassGenerator {
       private void buildBeforeReturnClause() {
          LocalVariables lvs = m_ctx.getLocalVariables();
 
-         if (lvs.hasReturn()) {
-            mv.visitVarInsn(ASTORE, lvs.indexOfResult());
-         }
+         lvs.storeResult();
 
-         MethodModel method = m_ctx.getMethod();
-         List<String> keys = method.getTransaction().getKeys();
-         List<String> values = method.getTransaction().getValues();
+         TransactionModel transaction = m_ctx.getMethod().getTransaction();
+
+         buildTransactionBody(lvs, transaction.getKeys(), transaction.getValues());
+         buildEventIfHave(lvs);
+
+         mv.visitLabel(m_bizEnd);
+
+         lvs.loadTransaction();
+         mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "complete", "()V", true);
+
+         lvs.loadResult();
+      }
+
+      private void buildTransactionBody(LocalVariables lvs, List<String> keys, List<String> values) {
          int index = 0;
 
          for (String key : keys) {
             String value = values.get(index++);
 
-            mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
-            mv.visitLdcInsn(key);
-            mv.visitVarInsn(ALOAD, lvs.indexOf(value));
+            lvs.loadTransaction();
+            m_ctx.prepare(key);
+            m_ctx.prepare(value);
             mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "addData",
                   "(Ljava/lang/String;Ljava/lang/Object;)V", true);
          }
 
-         mv.visitLdcInsn("200");
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-
-         Label l5 = new Label();
-         mv.visitJumpInsn(IFNE, l5);
-         mv.visitLdcInsn("201");
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
-
-         Label l6 = new Label();
-         mv.visitJumpInsn(IFEQ, l6);
-         mv.visitLabel(l5);
-         mv.visitFrame(Opcodes.F_APPEND, 2, new Object[] { m_ctx.getBinaryTransaction(), "java/lang/String" }, 0, null);
-         mv.visitVarInsn(ALOAD, 2);
+         lvs.loadTransaction();
          mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "success", "()V", true);
+      }
 
-         Label l7 = new Label();
-         mv.visitJumpInsn(GOTO, l7);
-         mv.visitLabel(l6);
-         mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-         mv.visitVarInsn(ALOAD, 2);
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "setStatus", "(Ljava/lang/String;)V", true);
+      private void buildEventIfHave(LocalVariables lvs) {
+         EventModel event = m_ctx.getMethod().getEvent();
 
-         mv.visitLabel(l7);
-         mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-         mv.visitLdcInsn("Guest");
-         mv.visitVarInsn(ALOAD, 1);
-         mv.visitMethodInsn(INVOKESTATIC, m_ctx.getBinaryCat(), "logEvent", "(Ljava/lang/String;Ljava/lang/String;)V",
-               false);
+         if (event != null) {
+            if (event.getKeys().isEmpty()) {
+               m_ctx.prepare(event.getType());
+               m_ctx.prepare(event.getName());
+               mv.visitMethodInsn(INVOKESTATIC, m_ctx.getBinaryCat(), "logEvent",
+                     "(Ljava/lang/String;Ljava/lang/String;)V", false);
+            } else {
 
-         mv.visitVarInsn(ALOAD, lvs.indexOfResult());
-         mv.visitVarInsn(ASTORE, lvs.indexOfReturn());
-         mv.visitLabel(m_bizEnd);
-
-         mv.visitVarInsn(ALOAD, lvs.indexOfTransaction());
-         mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "complete", "()V", true);
-         mv.visitVarInsn(ALOAD, lvs.indexOfReturn());
+            }
+         }
       }
 
       private void buildBeforeTryClause() {
+         LocalVariables lvs = m_ctx.getLocalVariables();
+
          m_bizStart = new Label();
          m_bizEnd = new Label();
          m_runtimeHandler = new Label();
          m_errorHandler = new Label();
          m_finallyHandler = new Label();
 
-         if (m_exceptions != null) {
-            for (int i = 0; i < m_exceptions.length; i++) {
-               String exception = m_exceptions[i];
+         List<String> exceptions = lvs.getExceptions();
 
-               m_checkedHandlers[i] = new Label();
-               mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_checkedHandlers[i], exception);
+         if (!exceptions.isEmpty()) {
+            int index = 0;
+
+            m_checkedHandlers = new Label[exceptions.size()];
+
+            for (String exception : exceptions) {
+               m_checkedHandlers[index] = new Label();
+               mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_checkedHandlers[index], exception);
+               index++;
             }
          }
 
          mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_runtimeHandler, "java/lang/RuntimeException");
          mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_errorHandler, "java/lang/Error");
-         mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_finallyHandler, null);
 
-         if (m_checkedHandlers != null) {
-            mv.visitTryCatchBlock(m_checkedHandlers[0], m_finallyHandler, m_finallyHandler, null);
+         if (lvs.hasReturn()) {
+            mv.visitTryCatchBlock(m_bizStart, m_bizEnd, m_finallyHandler, null);
+
+            if (m_checkedHandlers != null) {
+               mv.visitTryCatchBlock(m_checkedHandlers[0], m_finallyHandler, m_finallyHandler, null);
+            } else {
+               mv.visitTryCatchBlock(m_runtimeHandler, m_finallyHandler, m_finallyHandler, null);
+            }
          } else {
-            mv.visitTryCatchBlock(m_runtimeHandler, m_finallyHandler, m_finallyHandler, null);
+            mv.visitTryCatchBlock(m_bizStart, m_finallyHandler, m_finallyHandler, null);
          }
 
-         mv.visitLdcInsn(m_ctx.getTransactionType());
-         mv.visitLdcInsn(m_ctx.getTransactionName());
+         m_ctx.prepare(m_ctx.getTransactionType());
+         m_ctx.prepare(m_ctx.getTransactionName());
          mv.visitMethodInsn(INVOKESTATIC, m_ctx.getBinaryCat(), "newTransaction",
                "(Ljava/lang/String;Ljava/lang/String;)Lorg/unidal/cat/message/Transaction;", false);
-         mv.visitVarInsn(ASTORE, 2);
+
+         lvs.storeTransaction();
          mv.visitLabel(m_bizStart);
       }
 
       private void buildCheckedExceptionClause() {
-         if (m_exceptions != null) {
-            for (int i = 0; i < m_exceptions.length; i++) {
-               String exception = m_exceptions[i];
-               Label label = m_checkedHandlers[i];
+         LocalVariables lvs = m_ctx.getLocalVariables();
+         List<String> exceptions = lvs.getExceptions();
+
+         if (!exceptions.isEmpty()) {
+            int index = 0;
+
+            for (String exception : exceptions) {
+               Label label = m_checkedHandlers[index];
 
                mv.visitLabel(label);
 
-               if (i == 0) {
-                  mv.visitFrame(Opcodes.F_FULL, 3, new Object[] { m_ctx.getBinaryClassName(), "java/lang/String", //
-                        m_ctx.getBinaryTransaction() }, 1, new Object[] { exception });
+               if (index == 0) {
+                  mv.visitFrame(Opcodes.F_FULL, lvs.indexOfTransaction(), m_ctx.getLocalTypes(), 1,
+                        new Object[] { exception });
                } else {
                   mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { exception });
                }
 
-               mv.visitVarInsn(ASTORE, 3);
-               mv.visitVarInsn(ALOAD, 2);
-               mv.visitVarInsn(ALOAD, 3);
+               lvs.storeException();
+               lvs.loadTransaction();
+               lvs.loadException();
                mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "setStatus",
                      "(Ljava/lang/Throwable;)V", true);
-               mv.visitVarInsn(ALOAD, 3);
-               mv.visitInsn(ATHROW);
+               lvs.throwException();
+               index++;
             }
          }
       }
 
       private void buildErrorClause() {
+         LocalVariables lvs = m_ctx.getLocalVariables();
+
          mv.visitLabel(m_errorHandler);
          mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { "java/lang/Error" });
-         mv.visitVarInsn(ASTORE, 3);
-         mv.visitVarInsn(ALOAD, 2);
-         mv.visitVarInsn(ALOAD, 3);
+         lvs.storeException();
+         lvs.loadTransaction();
+         lvs.loadException();
          mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "setStatus", "(Ljava/lang/Throwable;)V",
                true);
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitInsn(ATHROW);
+         lvs.throwException();
       }
 
       private void buildFinallyClause() {
+         LocalVariables lvs = m_ctx.getLocalVariables();
+         int next = lvs.indexOfNext();
+
          mv.visitLabel(m_finallyHandler);
          mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { "java/lang/Throwable" });
-         mv.visitVarInsn(ASTORE, 4);
-         mv.visitVarInsn(ALOAD, 2);
+         mv.visitVarInsn(ASTORE, next);
+         lvs.loadTransaction();
          mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "complete", "()V", true);
-         mv.visitVarInsn(ALOAD, 4);
+         mv.visitVarInsn(ALOAD, next);
          mv.visitInsn(ATHROW);
       }
 
       private void buildRuntimeExceptionClause() {
+         LocalVariables lvs = m_ctx.getLocalVariables();
+
          mv.visitLabel(m_runtimeHandler);
 
          if (m_checkedHandlers != null) {
             mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { "java/lang/RuntimeException" });
          } else {
-            mv.visitFrame(Opcodes.F_FULL, 3,
-                  new Object[] { m_ctx.getBinaryClassName(), "java/lang/String", m_ctx.getBinaryTransaction() }, 1,
+            mv.visitFrame(Opcodes.F_FULL, lvs.indexOfTransaction(), m_ctx.getLocalTypes(), 1,
                   new Object[] { "java/lang/RuntimeException" });
          }
 
-         mv.visitVarInsn(ASTORE, 3);
-         mv.visitVarInsn(ALOAD, 2);
-         mv.visitVarInsn(ALOAD, 3);
+         lvs.storeException();
+         lvs.loadTransaction();
+         lvs.loadException();
          mv.visitMethodInsn(INVOKEINTERFACE, m_ctx.getBinaryTransaction(), "setStatus", "(Ljava/lang/Throwable;)V",
                true);
-         mv.visitVarInsn(ALOAD, 3);
-         mv.visitInsn(ATHROW);
+         lvs.throwException();
       }
 
       @Override
@@ -406,7 +605,8 @@ public class CatClassGenerator {
 
       @Override
       public void visitInsn(int opcode) {
-         if (opcode == ARETURN) {
+         if (opcode >= IRETURN && opcode <= RETURN) {
+            m_return = true;
             buildBeforeReturnClause();
             super.visitInsn(opcode);
             buildAfterReturnClause();
@@ -418,12 +618,17 @@ public class CatClassGenerator {
       @Override
       public void visitMaxs(int maxStack, int maxLocals) {
          m_maxStack = maxStack;
-         m_maxLocals = maxLocals;
+         m_maxLocals = maxLocals + m_ctx.getLocalVariables().getNewVariables();
       }
 
       @Override
       public void visitEnd() {
-         super.visitMaxs(m_maxStack, m_maxLocals + 100);
+         if (!m_return) {
+            buildBeforeReturnClause();
+            buildAfterReturnClause();
+         }
+
+         super.visitMaxs(m_maxStack + 100, m_maxLocals + 100);
          super.visitEnd();
       }
    }

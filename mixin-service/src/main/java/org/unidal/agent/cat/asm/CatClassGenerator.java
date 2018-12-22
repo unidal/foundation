@@ -356,7 +356,7 @@ public class CatClassGenerator {
       public void eval(String expr) {
          if (expr.equals("${return}")) {
             if (m_lvs.hasReturn()) {
-               m_mv.visitVarInsn(ALOAD, m_lvs.indexOfResult());
+               loadVariableInString(m_lvs.getReturnType(), m_lvs.indexOfResult());
             } else {
                m_mv.visitInsn(ACONST_NULL);
             }
@@ -365,7 +365,9 @@ public class CatClassGenerator {
                int index = Integer.parseInt(expr.substring("${arg".length(), expr.length() - 1));
 
                if (index >= 0 && index < m_lvs.getArgumentSize()) {
-                  m_mv.visitVarInsn(ALOAD, index + 1);
+                  Type type = m_lvs.getArgumentTypes()[index];
+
+                  loadVariableInString(type, index + 1);
                   return;
                }
             } catch (NumberFormatException e) {
@@ -375,8 +377,48 @@ public class CatClassGenerator {
             m_mv.visitLdcInsn(expr);
          } else if (expr.equals("${method}")) {
             m_mv.visitLdcInsn(m_ctx.getMethod().getName());
+         } else if (expr.equals("${class}")) {
+            m_mv.visitLdcInsn(m_ctx.getClassModel().getName());
          } else {
             m_mv.visitLdcInsn(expr);
+         }
+      }
+
+      private void loadVariableInString(Type type, int index) {
+         switch (type.getSort()) {
+         case Type.VOID:
+            break;
+         case Type.BOOLEAN:
+            m_mv.visitVarInsn(ILOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(Z)Ljava/lang/String;", false);
+            break;
+         case Type.CHAR:
+            m_mv.visitVarInsn(ILOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(C)Ljava/lang/String;", false);
+            break;
+         case Type.BYTE:
+         case Type.SHORT:
+         case Type.INT:
+            m_mv.visitVarInsn(ILOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(I)Ljava/lang/String;", false);
+            break;
+         case Type.FLOAT:
+            m_mv.visitVarInsn(FLOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(F)Ljava/lang/String;", false);
+            break;
+         case Type.LONG:
+            m_mv.visitVarInsn(LLOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(J)Ljava/lang/String;", false);
+            break;
+         case Type.DOUBLE:
+            m_mv.visitVarInsn(DLOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(D)Ljava/lang/String;", false);
+            break;
+         default:
+            m_mv.visitVarInsn(ALOAD, index);
+            m_mv.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;",
+                  false);
+            break;
          }
       }
    }
@@ -426,6 +468,10 @@ public class CatClassGenerator {
 
       public int getNewVariables() {
          return m_newVariables;
+      }
+
+      public Type getReturnType() {
+         return m_returnType;
       }
 
       public boolean hasReturn() {
@@ -766,12 +812,6 @@ public class CatClassGenerator {
       }
 
       @Override
-      public void visitCode() {
-         super.visitCode();
-         buildBeforeTryClause();
-      }
-
-      @Override
       public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
          Type type = Type.getType(desc);
 
@@ -782,6 +822,12 @@ public class CatClassGenerator {
          }
 
          return super.visitAnnotation(desc, visible);
+      }
+
+      @Override
+      public void visitCode() {
+         super.visitCode();
+         buildBeforeTryClause();
       }
 
       @Override

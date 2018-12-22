@@ -77,7 +77,10 @@ public class CatClassGenerator {
                m_ctx.prepare(method, mv, desc, exceptions);
                return new MethodWrapperForTransaction(m_ctx, mv);
             } else if (method.getEvent() != null) {
+               MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
+               m_ctx.prepare(method, mv, desc, exceptions);
+               return new MethodWrapperForEvent(m_ctx, mv);
             }
          }
 
@@ -521,6 +524,57 @@ public class CatClassGenerator {
       }
    }
 
+   private static class MethodWrapperForEvent extends MethodVisitor implements Opcodes {
+      private Context m_ctx;
+
+      private boolean m_return;
+
+      private int m_maxStack;
+
+      private int m_maxLocals;
+
+      public MethodWrapperForEvent(Context ctx, MethodVisitor mv) {
+         super(Opcodes.ASM5, mv);
+
+         m_ctx = ctx;
+      }
+
+      private void buildBeforeReturnClause() {
+         if (!m_return) {
+            m_return = true;
+
+            LocalVariables lvs = m_ctx.getLocalVariables();
+
+            lvs.storeResultIfHave();
+            m_ctx.eventIfHave();
+            lvs.loadResultIfHave();
+         }
+      }
+
+      @Override
+      public void visitEnd() {
+         buildBeforeReturnClause();
+
+         super.visitMaxs(m_maxStack + 100, m_maxLocals + 100);
+         super.visitEnd();
+      }
+
+      @Override
+      public void visitInsn(int opcode) {
+         if (opcode >= IRETURN && opcode <= RETURN) {
+            buildBeforeReturnClause();
+         }
+
+         super.visitInsn(opcode);
+      }
+
+      @Override
+      public void visitMaxs(int maxStack, int maxLocals) {
+         m_maxStack = maxStack;
+         m_maxLocals = maxLocals + m_ctx.getLocalVariables().getNewVariables();
+      }
+   }
+
    private static class MethodWrapperForTransaction extends MethodVisitor implements Opcodes {
       private Context m_ctx;
 
@@ -556,17 +610,21 @@ public class CatClassGenerator {
       }
 
       private void buildBeforeReturnClause() {
-         LocalVariables lvs = m_ctx.getLocalVariables();
+         if (!m_return) {
+            m_return = true;
 
-         lvs.storeResultIfHave();
+            LocalVariables lvs = m_ctx.getLocalVariables();
 
-         m_ctx.transactionAddData();
-         m_ctx.transactionSuccess();
-         m_ctx.eventIfHave();
-         mv.visitLabel(m_bizEnd);
+            lvs.storeResultIfHave();
 
-         m_ctx.transactionComplete();
-         lvs.loadResultIfHave();
+            m_ctx.transactionAddData();
+            m_ctx.transactionSuccess();
+            m_ctx.eventIfHave();
+            mv.visitLabel(m_bizEnd);
+
+            m_ctx.transactionComplete();
+            lvs.loadResultIfHave();
+         }
       }
 
       private void buildBeforeTryClause() {
@@ -685,11 +743,9 @@ public class CatClassGenerator {
 
       @Override
       public void visitEnd() {
-         if (!m_return) {
-            buildBeforeReturnClause();
-            buildAfterReturnClause();
-         }
+         buildBeforeReturnClause();
 
+         buildAfterReturnClause();
          super.visitMaxs(m_maxStack + 100, m_maxLocals + 100);
          super.visitEnd();
       }
@@ -697,10 +753,7 @@ public class CatClassGenerator {
       @Override
       public void visitInsn(int opcode) {
          if (opcode >= IRETURN && opcode <= RETURN) {
-            m_return = true;
             buildBeforeReturnClause();
-            super.visitInsn(opcode);
-            buildAfterReturnClause();
          }
 
          super.visitInsn(opcode);

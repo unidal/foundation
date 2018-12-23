@@ -12,4 +12,6 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface CatEnabled {
    boolean value() default true;
+
+   String target() default "";
 }

@@ -16,6 +16,7 @@ import org.unidal.agent.cat.sample.hello.HelloArgumentType;
 import org.unidal.agent.cat.sample.hello.HelloException;
 import org.unidal.agent.cat.sample.hello.HelloExpression;
 import org.unidal.agent.cat.sample.hello.HelloMethod;
+import org.unidal.agent.cat.sample.hello.HelloOverride;
 import org.unidal.agent.cat.sample.hello.HelloReturnType;
 
 public class AllHelloTests {
@@ -74,6 +75,7 @@ public class AllHelloTests {
       classes.add(HelloExpression.class);
       classes.add(HelloMethod.class);
       classes.add(HelloReturnType.class);
+      classes.add(HelloOverride.class);
 
       for (Class<?> clazz : classes) {
          Object instance = clazz.newInstance();

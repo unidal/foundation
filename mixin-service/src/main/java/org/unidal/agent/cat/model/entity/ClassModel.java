@@ -13,6 +13,8 @@ import org.unidal.agent.cat.model.IVisitor;
 public class ClassModel extends BaseEntity<ClassModel> {
    private String m_name;
 
+   private String m_originName;
+
    private Boolean m_enabled;
 
    private List<MethodModel> m_methods = new ArrayList<MethodModel>();
@@ -98,6 +100,10 @@ public class ClassModel extends BaseEntity<ClassModel> {
       return m_name;
    }
 
+   public String getOriginName() {
+      return m_originName;
+   }
+
    @Override
    public int hashCode() {
       int hash = 0;
@@ -114,6 +120,10 @@ public class ClassModel extends BaseEntity<ClassModel> {
    @Override
    public void mergeAttributes(ClassModel other) {
       assertAttributeEquals(other, ENTITY_CLASS, ATTR_NAME, m_name, other.getName());
+
+      if (other.getOriginName() != null) {
+         m_originName = other.getOriginName();
+      }
 
       if (other.getEnabled() != null) {
          m_enabled = other.getEnabled();
@@ -147,6 +157,11 @@ public class ClassModel extends BaseEntity<ClassModel> {
 
    public ClassModel setName(String name) {
       m_name = name;
+      return this;
+   }
+
+   public ClassModel setOriginName(String originName) {
+      m_originName = originName;
       return this;
    }
 

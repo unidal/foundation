@@ -6,6 +6,7 @@
   </entity>
   <entity name="class">
     <attribute name="name" value-type="String" />
+    <attribute name="origin-name" value-type="String" />
     <attribute name="enabled" value-type="boolean" />
     <entity-ref name="method" type="list" names="methods" />
   </entity>

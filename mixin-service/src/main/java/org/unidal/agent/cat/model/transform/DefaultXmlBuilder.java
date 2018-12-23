@@ -4,6 +4,7 @@ package org.unidal.agent.cat.model.transform;
 import static org.unidal.agent.cat.model.Constants.ATTR_DESC;
 import static org.unidal.agent.cat.model.Constants.ATTR_ENABLED;
 import static org.unidal.agent.cat.model.Constants.ATTR_NAME;
+import static org.unidal.agent.cat.model.Constants.ATTR_ORIGIN_NAME;
 import static org.unidal.agent.cat.model.Constants.ATTR_TYPE;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_KEY;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_SUCCESS;
@@ -270,7 +271,7 @@ public class DefaultXmlBuilder implements IVisitor {
 
    @Override
    public void visitClass(ClassModel _class) {
-      startTag(ENTITY_CLASS, null, ATTR_NAME, _class.getName(), ATTR_ENABLED, _class.getEnabled());
+      startTag(ENTITY_CLASS, null, ATTR_NAME, _class.getName(), ATTR_ORIGIN_NAME, _class.getOriginName(), ATTR_ENABLED, _class.getEnabled());
 
       if (!_class.getMethods().isEmpty()) {
          for (MethodModel method : _class.getMethods()) {

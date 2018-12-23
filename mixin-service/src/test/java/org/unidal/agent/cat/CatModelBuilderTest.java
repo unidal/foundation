@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
-import org.unidal.agent.cat.sample.hello.HelloService;
 import org.xml.sax.SAXException;
 
 public class CatModelBuilderTest {
@@ -22,5 +21,15 @@ public class CatModelBuilderTest {
       RootModel actual = builder.build();
 
       Assert.assertEquals(expected.toString(), actual.toString());
+   }
+
+   @CatEnabled(target = "target.full.class.name")
+   public static class HelloService {
+      @CatTransaction(type = "Service", name = "hello", //
+            keys = { "value", "return" }, values = { "${arg0}", "${return}" })
+      @CatEvent(type = "Hello", name = "${arg0}")
+      public String hello(String value) {
+         return value;
+      }
    }
 }

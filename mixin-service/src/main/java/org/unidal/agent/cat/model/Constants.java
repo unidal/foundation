@@ -9,6 +9,8 @@ public class Constants {
 
    public static final String ATTR_NAME = "name";
 
+   public static final String ATTR_ORIGIN_NAME = "origin-name";
+
    public static final String ATTR_TYPE = "type";
 
    public static final String ELEMENT_KEY = "key";

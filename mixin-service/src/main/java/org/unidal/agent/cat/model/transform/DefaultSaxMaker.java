@@ -4,6 +4,7 @@ package org.unidal.agent.cat.model.transform;
 import static org.unidal.agent.cat.model.Constants.ATTR_DESC;
 import static org.unidal.agent.cat.model.Constants.ATTR_ENABLED;
 import static org.unidal.agent.cat.model.Constants.ATTR_NAME;
+import static org.unidal.agent.cat.model.Constants.ATTR_ORIGIN_NAME;
 import static org.unidal.agent.cat.model.Constants.ATTR_TYPE;
 
 import org.xml.sax.Attributes;
@@ -19,8 +20,13 @@ public class DefaultSaxMaker implements IMaker<Attributes> {
    @Override
    public ClassModel buildClass(Attributes attributes) {
       String name = attributes.getValue(ATTR_NAME);
+      String originName = attributes.getValue(ATTR_ORIGIN_NAME);
       String enabled = attributes.getValue(ATTR_ENABLED);
       ClassModel class_ = new ClassModel(name);
+
+      if (originName != null) {
+         class_.setOriginName(originName);
+      }
 
       if (enabled != null) {
          class_.setEnabled(convert(Boolean.class, enabled, null));

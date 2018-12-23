@@ -50,9 +50,10 @@ public class CatModelBuilder {
       for (Map.Entry<String, Boolean> e : m_classes.entrySet()) {
          if (e.getValue().booleanValue()) { // open
             try {
-               ClassModel model = root.findOrCreateClass(e.getKey());
+               ClassModel model = new ClassModel(e.getKey());
 
                new ClassModelBuilder(model).build();
+               root.addClass(model);
             } catch (Throwable t) {
                t.printStackTrace();
             }
@@ -136,6 +137,9 @@ public class CatModelBuilder {
       public void visit(String name, Object value) {
          if (name.equals("value") && Boolean.FALSE.equals(value)) {
             m_model.setEnabled(false);
+         } else if (name.equals("target")) {
+            m_model.setOriginName(m_model.getName());
+            m_model.setName((String) value);
          } else {
             m_model.setEnabled(true);
          }

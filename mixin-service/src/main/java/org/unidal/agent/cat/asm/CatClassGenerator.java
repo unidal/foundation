@@ -227,7 +227,7 @@ public class CatClassGenerator {
       }
 
       public Object[] getLocalTypes() {
-         Object[] types = new Object[m_localVariables.indexOfTransaction() + 1];
+         Object[] types = new Object[1 + m_localVariables.getArgumentSize() + 1];
          int index = 1;
 
          types[0] = getBinaryClassName();
@@ -262,7 +262,7 @@ public class CatClassGenerator {
             index++;
          }
 
-         types[m_localVariables.indexOfTransaction()] = getBinaryTransaction();
+         types[index] = getBinaryTransaction();
          return types;
       }
 
@@ -361,12 +361,7 @@ public class CatClassGenerator {
                if (index >= 0 && index < m_lvs.getArgumentSize()) {
                   Type type = m_lvs.getArgumentTypes()[index];
 
-                  if (m_lvs.isStaticMethod()) {
-                     loadVariableInString(type, index);
-                  } else {
-                     loadVariableInString(type, index + 1);
-                  }
-
+                  loadVariableInString(type, m_lvs.indexOfArgument(index));
                   return;
                }
             } catch (NumberFormatException e) {
@@ -502,6 +497,14 @@ public class CatClassGenerator {
          return m_returnType.getSize() > 0;
       }
 
+      public int indexOfArgument(int index) {
+         if (isStaticMethod()) {
+            return index;
+         } else {
+            return index + 1;
+         }
+      }
+
       public int indexOfEvent() {
          if (m_indexOfEvent == 0) {
             m_indexOfEvent = indexOfNext();
@@ -530,9 +533,9 @@ public class CatClassGenerator {
 
       public int indexOfTransaction() {
          if (isStaticMethod()) {
-            return getArgumentSize();
-         } else {
             return getArgumentSize() + 1;
+         } else {
+            return getArgumentSize() + 2;
          }
       }
 
@@ -790,8 +793,9 @@ public class CatClassGenerator {
                mv.visitLabel(label);
 
                if (index == 0) {
-                  mv.visitFrame(Opcodes.F_FULL, lvs.indexOfTransaction(), m_ctx.getLocalTypes(), 1,
-                        new Object[] { exception });
+                  Object[] types = m_ctx.getLocalTypes();
+
+                  mv.visitFrame(Opcodes.F_FULL, types.length, types, 1, new Object[] { exception });
                } else {
                   mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { exception });
                }
@@ -834,8 +838,9 @@ public class CatClassGenerator {
          if (m_checkedHandlers != null) {
             mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { "java/lang/RuntimeException" });
          } else {
-            mv.visitFrame(Opcodes.F_FULL, lvs.indexOfTransaction(), m_ctx.getLocalTypes(), 1,
-                  new Object[] { "java/lang/RuntimeException" });
+            Object[] types = m_ctx.getLocalTypes();
+
+            mv.visitFrame(Opcodes.F_FULL, types.length, types, 1, new Object[] { "java/lang/RuntimeException" });
          }
 
          lvs.storeException();

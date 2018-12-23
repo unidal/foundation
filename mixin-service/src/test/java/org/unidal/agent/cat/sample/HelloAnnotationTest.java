@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
@@ -13,6 +14,14 @@ import org.unidal.agent.cat.sample.hello.HelloAnnotation;
 
 public class HelloAnnotationTest {
    private static Set<String> s_mixins = new LinkedHashSet<String>();
+
+   @Before
+   public void before() throws Exception {
+      System.setProperty("CAT_DEBUG", "false");
+
+      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
+      new SunJdkAttacher().loadAgent(MockAgent.class);
+   }
 
    private Object[] buildParameters(Method method) {
       Class<?>[] types = method.getParameterTypes();
@@ -40,10 +49,6 @@ public class HelloAnnotationTest {
 
    @Test
    public void test() throws Exception {
-      System.setProperty("CAT_DEBUG", "false");
-
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
-      new SunJdkAttacher().loadAgent(MockAgent.class);
       HelloAnnotation instance = new HelloAnnotation();
       Method[] methods = HelloAnnotation.class.getMethods();
 

@@ -5,6 +5,7 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
@@ -13,13 +14,16 @@ import org.unidal.agent.mixin.sample.greeting.Greeting;
 public class HelloOverrideTest {
    private static Set<String> s_mixins = new LinkedHashSet<String>();
 
-   @Test
-   public void test() throws Exception {
+   @Before
+   public void before() throws Exception {
       System.setProperty("CAT_DEBUG", "false");
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloOverride");
       new SunJdkAttacher().loadAgent(MockAgent.class);
+   }
 
+   @Test
+   public void test() throws Exception {
       Greeting greeting = new Greeting();
 
       greeting.sayHello("Frankie");

@@ -44,12 +44,12 @@ public class HelloExpressionTest {
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloExpression");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloExpression type = new HelloExpression();
+      HelloExpression instance = new HelloExpression();
       Method[] methods = HelloExpression.class.getMethods();
 
       for (Method method : methods) {
          if (method.getDeclaringClass() != Object.class) {
-            method.invoke(type, buildParameters(method));
+            method.invoke(instance, buildParameters(method));
          }
       }
 

@@ -42,13 +42,13 @@ public class HelloExceptionTest {
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloException");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloException exception = new HelloException();
+      HelloException instance = new HelloException();
       Method[] methods = HelloException.class.getMethods();
 
       for (Method method : methods) {
          if (method.getDeclaringClass() != Object.class) {
             try {
-               method.invoke(exception, buildParameters(method));
+               method.invoke(instance, buildParameters(method));
             } catch (Throwable e) {
                // ignore it
             }

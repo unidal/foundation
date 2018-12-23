@@ -44,12 +44,12 @@ public class HelloAnnotationTest {
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloAnnotation type = new HelloAnnotation();
+      HelloAnnotation instance = new HelloAnnotation();
       Method[] methods = HelloAnnotation.class.getMethods();
 
       for (Method method : methods) {
          if (method.getDeclaringClass() != Object.class) {
-            method.invoke(type, buildParameters(method));
+            method.invoke(instance, buildParameters(method));
          }
       }
 

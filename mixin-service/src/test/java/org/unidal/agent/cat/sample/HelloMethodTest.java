@@ -9,9 +9,9 @@ import java.util.Set;
 import org.junit.Test;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
-import org.unidal.agent.cat.sample.hello.HelloArgumentType;
+import org.unidal.agent.cat.sample.hello.HelloMethod;
 
-public class HelloArgumentTypeTest {
+public class HelloMethodTest {
    private static Set<String> s_mixins = new LinkedHashSet<String>();
 
    private Object[] buildParameters(Method method) {
@@ -28,6 +28,8 @@ public class HelloArgumentTypeTest {
             params[index] = 0f;
          } else if (type == Double.TYPE) {
             params[index] = 0d;
+         } else if (type == String.class) {
+            params[index] = "str" + (index + 1);
          }
 
          index++;
@@ -40,10 +42,10 @@ public class HelloArgumentTypeTest {
    public void test() throws Exception {
       System.setProperty("CAT_DEBUG", "false");
 
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloArgumentType");
+      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloMethod");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloArgumentType instance = new HelloArgumentType();
-      Method[] methods = HelloArgumentType.class.getMethods();
+      HelloMethod instance = new HelloMethod("str1");
+      Method[] methods = HelloMethod.class.getMethods();
 
       for (Method method : methods) {
          if (method.getDeclaringClass() != Object.class) {
@@ -51,7 +53,7 @@ public class HelloArgumentTypeTest {
          }
       }
 
-      Thread.sleep(1);
+      Thread.sleep(2);
    }
 
    public static class MockAgent {

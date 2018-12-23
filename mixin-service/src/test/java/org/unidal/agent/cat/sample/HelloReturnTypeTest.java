@@ -42,12 +42,12 @@ public class HelloReturnTypeTest {
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloReturnType");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloReturnType type = new HelloReturnType();
+      HelloReturnType instance = new HelloReturnType();
       Method[] methods = HelloReturnType.class.getMethods();
 
       for (Method method : methods) {
          if (method.getDeclaringClass() != Object.class) {
-            method.invoke(type, buildParameters(method));
+            method.invoke(instance, buildParameters(method));
          }
       }
 

@@ -89,12 +89,12 @@ public class CatClassGenerator {
             if (method.getTransaction() != null) {
                MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
-               m_ctx.prepare(method, mv, desc, exceptions);
+               m_ctx.prepare(method, mv, access, desc, exceptions);
                return new MethodWrapperForTransaction(m_ctx, mv);
             } else if (method.getEvent() != null) {
                MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
-               m_ctx.prepare(method, mv, desc, exceptions);
+               m_ctx.prepare(method, mv, access, desc, exceptions);
                return new MethodWrapperForEvent(m_ctx, mv);
             }
          }
@@ -274,10 +274,10 @@ public class CatClassGenerator {
          return m_method;
       }
 
-      public void prepare(MethodModel method, MethodVisitor mv, String desc, String[] exceptions) {
+      public void prepare(MethodModel method, MethodVisitor mv, int access, String desc, String[] exceptions) {
          m_method = method;
          m_mv = mv;
-         m_localVariables = new LocalVariables(mv, desc, exceptions);
+         m_localVariables = new LocalVariables(mv, access, desc, exceptions);
          m_expressions = new Expressions(this, mv);
       }
 
@@ -354,20 +354,19 @@ public class CatClassGenerator {
       }
 
       public void eval(String expr) {
-         if (expr.equals("${return}")) {
-            if (m_lvs.hasReturn()) {
-               loadVariableInString(m_lvs.getReturnType(), m_lvs.indexOfResult());
-            } else {
-               m_mv.visitInsn(ACONST_NULL);
-            }
-         } else if (expr.startsWith("${arg") && expr.endsWith("}")) {
+         if (expr.startsWith("${arg") && expr.endsWith("}")) {
             try {
                int index = Integer.parseInt(expr.substring("${arg".length(), expr.length() - 1));
 
                if (index >= 0 && index < m_lvs.getArgumentSize()) {
                   Type type = m_lvs.getArgumentTypes()[index];
 
-                  loadVariableInString(type, index + 1);
+                  if (m_lvs.isStaticMethod()) {
+                     loadVariableInString(type, index);
+                  } else {
+                     loadVariableInString(type, index + 1);
+                  }
+
                   return;
                }
             } catch (NumberFormatException e) {
@@ -375,10 +374,32 @@ public class CatClassGenerator {
             }
 
             m_mv.visitLdcInsn(expr);
+         } else if (expr.equals("${return}")) {
+            if (m_lvs.hasReturn()) {
+               loadVariableInString(m_lvs.getReturnType(), m_lvs.indexOfResult());
+            } else {
+               m_mv.visitInsn(ACONST_NULL);
+            }
          } else if (expr.equals("${method}")) {
             m_mv.visitLdcInsn(m_ctx.getMethod().getName());
          } else if (expr.equals("${class}")) {
-            m_mv.visitLdcInsn(m_ctx.getClassModel().getName());
+            String name = m_ctx.getClassModel().getName();
+            int pos = name.lastIndexOf('.');
+
+            if (pos > 0) {
+               m_mv.visitLdcInsn(name.substring(pos + 1));
+            } else {
+               m_mv.visitLdcInsn(name);
+            }
+         } else if (expr.equals("${package}")) {
+            String name = m_ctx.getClassModel().getName();
+            int pos = name.lastIndexOf('.');
+
+            if (pos > 0) {
+               m_mv.visitLdcInsn(name.substring(0, pos));
+            } else {
+               m_mv.visitLdcInsn("");
+            }
          } else {
             m_mv.visitLdcInsn(expr);
          }
@@ -426,6 +447,8 @@ public class CatClassGenerator {
    private static class LocalVariables implements Opcodes {
       private MethodVisitor m_mv;
 
+      private int m_access;
+
       private Type[] m_argumentTypes;
 
       private Type m_returnType;
@@ -436,8 +459,9 @@ public class CatClassGenerator {
 
       private int m_indexOfEvent;
 
-      public LocalVariables(MethodVisitor mv, String desc, String[] exceptions) {
+      public LocalVariables(MethodVisitor mv, int access, String desc, String[] exceptions) {
          m_mv = mv;
+         m_access = access;
          m_argumentTypes = Type.getArgumentTypes(desc);
          m_returnType = Type.getReturnType(desc);
 
@@ -494,18 +518,26 @@ public class CatClassGenerator {
          m_newVariables++;
 
          if (hasReturn()) {
-            return getArgumentSize() + 3 + m_newVariables;
+            return indexOfTransaction() + 2 + m_newVariables;
          } else {
-            return getArgumentSize() + 2 + m_newVariables;
+            return indexOfTransaction() + 1 + m_newVariables;
          }
       }
 
       public int indexOfResult() {
-         return getArgumentSize() + 2;
+         return indexOfTransaction() + 1;
       }
 
       public int indexOfTransaction() {
-         return getArgumentSize() + 1;
+         if (isStaticMethod()) {
+            return getArgumentSize();
+         } else {
+            return getArgumentSize() + 1;
+         }
+      }
+
+      public boolean isStaticMethod() {
+         return (m_access & ACC_STATIC) != 0;
       }
 
       public void loadEvent() {

@@ -36,6 +36,7 @@ public class HelloAnnotation {
    @CatTransaction(type = TYPE, name = "${method}")
    @CatEvent(type = TYPE, name = "${method}", //
          keys = { "name", "return" }, values = { "${arg0}", "${return}" })
-   public void helloTransactionEventData(String name) {
+   public String helloTransactionEventData(String name) {
+      return name;
    }
 }

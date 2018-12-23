@@ -44,7 +44,7 @@ public class HelloMethodTest {
 
       s_mixins.add(getClass().getPackage().getName() + ".hello.HelloMethod");
       new SunJdkAttacher().loadAgent(MockAgent.class);
-      HelloMethod instance = new HelloMethod("str1");
+      HelloMethod instance = new HelloMethod();
       Method[] methods = HelloMethod.class.getMethods();
 
       for (Method method : methods) {

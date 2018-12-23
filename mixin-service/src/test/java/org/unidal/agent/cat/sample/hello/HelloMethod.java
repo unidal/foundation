@@ -8,7 +8,7 @@ public class HelloMethod {
    private static final String TYPE = "HelloMethod";
 
    @CatTransaction(type = TYPE, name = "${method}", keys = { "class", "arg0" }, values = { "${class}", "${arg0}" })
-   public HelloMethod(String str) {
+   public HelloMethod() {
    }
 
    @CatTransaction(type = TYPE, name = "${method}", keys = { "class", "arg0" }, values = { "${class}", "${arg0}" })

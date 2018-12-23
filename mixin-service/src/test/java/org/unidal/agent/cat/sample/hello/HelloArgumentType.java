@@ -7,32 +7,39 @@ import org.unidal.agent.cat.CatTransaction;
 public class HelloArgumentType {
    private static final String TYPE = "HelloArgumentType";
 
-   @CatTransaction(type = TYPE, name = "void helloVoid(String name)")
-   public void helloVoid(String name) {
+   @CatTransaction(type = TYPE, name = "void helloBoolean(boolean value)", keys = "arg0", values = "${arg0}")
+   public void helloBoolean(boolean value) {
    }
 
-   @CatTransaction(type = TYPE, name = "double helloDouble(double value)")
-   public double helloDouble(double value) {
-      return 0;
+   @CatTransaction(type = TYPE, name = "void helloByte(byte value)", keys = "arg0", values = "${arg0}")
+   public void helloByte(byte value) {
    }
 
-   @CatTransaction(type = TYPE, name = "float helloFloat(float value)")
-   public float helloFloat(float value) {
-      return 0;
+   @CatTransaction(type = TYPE, name = "void helloChar(char value)", keys = "arg0", values = "${arg0}")
+   public void helloChar(char value) {
    }
 
-   @CatTransaction(type = TYPE, name = "int helloInt(int value)")
-   public int helloInt(int value) {
-      return 0;
+   @CatTransaction(type = TYPE, name = "void helloDouble(double value)", keys = "arg0", values = "${arg0}")
+   public void helloDouble(double value) {
    }
 
-   @CatTransaction(type = TYPE, name = "long helloLong(long value)")
-   public long helloLong(long value) {
-      return 0;
+   @CatTransaction(type = TYPE, name = "void helloFloat(float value)", keys = "arg0", values = "${arg0}")
+   public void helloFloat(float value) {
    }
 
-   @CatTransaction(type = TYPE, name = "String helloString(String name)")
-   public String helloString(String name) {
-      return null;
+   @CatTransaction(type = TYPE, name = "void helloInt(int value)", keys = "arg0", values = "${arg0}")
+   public void helloInt(int value) {
+   }
+
+   @CatTransaction(type = TYPE, name = "void helloLong(long value)", keys = "arg0", values = "${arg0}")
+   public void helloLong(long value) {
+   }
+
+   @CatTransaction(type = TYPE, name = "void helloShort(short value)", keys = "arg0", values = "${arg0}")
+   public void helloShort(short value) {
+   }
+
+   @CatTransaction(type = TYPE, name = "void helloString(String value)", keys = "arg0", values = "${arg0}")
+   public void helloString(String value) {
    }
 }

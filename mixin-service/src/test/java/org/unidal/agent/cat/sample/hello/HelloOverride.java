@@ -7,6 +7,10 @@ import org.unidal.agent.cat.CatTransaction;
 
 @CatEnabled(target = "org.unidal.agent.mixin.sample.greeting.Greeting")
 public class HelloOverride {
+   @CatTransaction(type = "Greeting", name = "${method}")
+   public HelloOverride() {
+   }
+
    @CatTransaction(type = "Greeting", name = "${method}", //
          keys = { "arg0", "return" }, values = { "${arg0}", "${return}" })
    public String sayBye(String name) throws IOException {

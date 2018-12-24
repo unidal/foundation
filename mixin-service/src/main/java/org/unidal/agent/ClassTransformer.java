@@ -1,11 +1,8 @@
 package org.unidal.agent;
 
-import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,32 +31,6 @@ public class ClassTransformer implements ClassFileTransformer {
 
       for (JarFile jarFile : jarFiles) {
          m_instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
-      }
-
-      ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-      if (cl instanceof URLClassLoader) {
-         URL[] urls = ((URLClassLoader) cl).getURLs();
-
-         for (URL url : urls) {
-            String path = url.getPath();
-
-            if (path.endsWith(".jar")) {
-               boolean system = path.contains("/jre/lib/") //
-                     || path.contains("agent-") //
-                     || path.contains("mixin-") //
-                     || path.contains("/asm-") //
-                     || path.contains("/junit-");
-
-               if (!system) {
-                  try {
-                     m_instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(path));
-                  } catch (IOException e) {
-                     e.printStackTrace();
-                  }
-               }
-            }
-         }
       }
    }
 

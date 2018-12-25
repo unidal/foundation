@@ -1,30 +1,28 @@
 package org.unidal.agent.cat.sample;
 
-import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
 
-public class AllHelloTests {
-   private static Set<String> s_mixins = new LinkedHashSet<String>();
+public class AllHelloTests extends AbstractHelloTest {
+   @Override
+   protected void initialize(Set<String> classes) {
+      classes.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloArgumentType");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloException");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloExpression");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloMethod");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloOverride");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloReturnType");
+   }
 
    @Before
    public void before() throws Exception {
-      System.setProperty("CAT_DEBUG", "false");
+      initialize(s_mixins);
 
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloArgumentType");
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloException");
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloExpression");
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloMethod");
-      s_mixins.add(getClass().getPackage().getName() + ".hello.HelloReturnType");
-
-      new SunJdkAttacher().loadAgent(MockAgent.class);
+      new SunJdkAttacher().loadAgent(MyAgent.class);
    }
 
    @Test
@@ -34,18 +32,7 @@ public class AllHelloTests {
       new HelloExceptionTest().test();
       new HelloExpressionTest().test();
       new HelloMethodTest().test();
+      new HelloOverrideTest().test();
       new HelloReturnTypeTest().test();
-   }
-
-   public static class MockAgent {
-      public static void agentmain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException {
-         ClassTransformer transformer = new ClassTransformer(inst);
-
-         for (String mixin : s_mixins) {
-            transformer.register(mixin);
-         }
-
-         inst.addTransformer(transformer, false);
-      }
    }
 }

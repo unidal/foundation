@@ -14,9 +14,16 @@ import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.RootModel;
 
 public class CatClassWeaver implements ClassWeaver {
+   public static final String ID = "cat";
+
    private RootModel m_model;
 
    private CatModelBuilder m_builder = new CatModelBuilder();
+
+   @Override
+   public String getId() {
+      return ID;
+   }
 
    @Override
    public JarFile initialize() {
@@ -29,6 +36,10 @@ public class CatClassWeaver implements ClassWeaver {
       ClassModel model = m_model.findClass(className);
 
       return model != null;
+   }
+
+   public void register(ClassModel model) {
+      m_builder.register(model);
    }
 
    @Override

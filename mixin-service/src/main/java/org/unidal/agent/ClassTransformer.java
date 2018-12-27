@@ -19,6 +19,16 @@ public class ClassTransformer implements ClassFileTransformer {
       m_instrumentation = instrumentation;
    }
 
+   public ClassWeaver getWeaver(String id) {
+      ClassWeaver weaver = m_manager.findById(id);
+
+      if (weaver == null) {
+         throw new IllegalArgumentException(String.format("Unknown ClassWeaver(%d)!", id));
+      }
+
+      return weaver;
+   }
+
    private synchronized void initialize() {
       if (!m_initialized.get()) {
          initializeClasspath();
@@ -44,7 +54,7 @@ public class ClassTransformer implements ClassFileTransformer {
       initialize();
 
       String className = binaryClassName.replace('/', '.');
-      ClassWeaver weaver = m_manager.find(className);
+      ClassWeaver weaver = m_manager.findByClass(className);
 
       if (weaver != null) {
          try {

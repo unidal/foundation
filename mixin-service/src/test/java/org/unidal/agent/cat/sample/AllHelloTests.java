@@ -20,7 +20,7 @@ public class AllHelloTests extends AbstractHelloTest {
 
    @Before
    public void before() throws Exception {
-      initialize(s_mixins);
+      initialize(s_classNames);
 
       new SunJdkAttacher().loadAgent(MyAgent.class);
    }
@@ -34,5 +34,6 @@ public class AllHelloTests extends AbstractHelloTest {
       new HelloMethodTest().test();
       new HelloOverrideTest().test();
       new HelloReturnTypeTest().test();
+      new HelloModelTest().test();
    }
 }

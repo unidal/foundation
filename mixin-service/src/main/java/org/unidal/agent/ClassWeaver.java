@@ -5,6 +5,13 @@ import java.util.jar.JarFile;
 
 public interface ClassWeaver {
    /**
+    * A key to identify a class weaver.
+    * 
+    * @return unique id
+    */
+   public String getId();
+
+   /**
     * Initialize the weaver, and return a jar file to append to bootstrap class path so that it could be loaded without real class
     * file, or return null.
     * 

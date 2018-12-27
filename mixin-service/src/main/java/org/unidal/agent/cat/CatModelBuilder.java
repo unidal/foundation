@@ -25,7 +25,9 @@ import org.unidal.agent.cat.model.transform.BaseVisitor;
 import org.unidal.helper.Splitters;
 
 public class CatModelBuilder {
-   private Map<String, Boolean> m_classes = new LinkedHashMap<String, Boolean>();
+   private Map<String, Boolean> m_classNames = new LinkedHashMap<String, Boolean>();
+
+   private Map<String, ClassModel> m_classModels = new LinkedHashMap<String, ClassModel>();
 
    private static boolean isAnnotation(String desc, Class<?> clazz) {
       Type type = Type.getType(desc);
@@ -40,14 +42,14 @@ public class CatModelBuilder {
       // step 1: collect cat classes from META-INF/cat.properties in the class paths
       for (URL url : urls) {
          try {
-            loadClasses(url, m_classes);
+            loadClassNames(url, m_classNames);
          } catch (Throwable t) {
             t.printStackTrace();
          }
       }
 
       // step 2: build model for cat classes
-      for (Map.Entry<String, Boolean> e : m_classes.entrySet()) {
+      for (Map.Entry<String, Boolean> e : m_classNames.entrySet()) {
          if (e.getValue().booleanValue()) { // open
             try {
                ClassModel model = new ClassModel(e.getKey());
@@ -59,8 +61,13 @@ public class CatModelBuilder {
             }
          }
       }
+      
+      // step 3: add model from configuration center
+      for (ClassModel model : m_classModels.values()) {
+         root.addClass(model);
+      }
 
-      // step 3: remove unrelated method
+      // step 4: remove unrelated method
       root.accept(new MethodRemovalVisitor());
 
       return root;
@@ -83,7 +90,7 @@ public class CatModelBuilder {
       return urls;
    }
 
-   private void loadClasses(URL url, Map<String, Boolean> classes) throws IOException {
+   private void loadClassNames(URL url, Map<String, Boolean> classes) throws IOException {
       InputStream in = url.openStream();
 
       try {
@@ -115,13 +122,12 @@ public class CatModelBuilder {
       }
    }
 
-   public void register(String mixinClass) {
-      m_classes.put(mixinClass, true);
+   public void register(ClassModel classModel) {
+      m_classModels.put(classModel.getName(), classModel);
    }
 
-   // for test case only
-   public void unregister(String mixinClass) {
-      m_classes.remove(mixinClass);
+   public void register(String className) {
+      m_classNames.put(className, true);
    }
 
    private static class CatEnabledAnnotationVisitor extends AnnotationVisitor {
@@ -143,58 +149,6 @@ public class CatModelBuilder {
          } else {
             m_model.setEnabled(true);
          }
-      }
-   }
-
-   private static class CatTransactionAnnotationVisitor extends AnnotationVisitor {
-      private TransactionModel m_transaction;
-
-      public CatTransactionAnnotationVisitor(TransactionModel transaction) {
-         super(Opcodes.ASM5);
-
-         m_transaction = transaction;
-      }
-
-      @Override
-      public void visit(String name, Object value) {
-         if ("type".equals(name)) {
-            m_transaction.setType((String) value);
-         } else if ("name".equals(name)) {
-            m_transaction.setName((String) value);
-         }
-      }
-
-      @Override
-      public AnnotationVisitor visitArray(String name) {
-         if ("keys".equals(name)) {
-            return new AnnotationVisitor(Opcodes.ASM5) {
-               @Override
-               public void visit(String name, Object value) {
-                  if (value instanceof String[]) {
-                     for (String val : (String[]) value) {
-                        m_transaction.addKey(val);
-                     }
-                  } else {
-                     m_transaction.addKey((String) value);
-                  }
-               }
-            };
-         } else if ("values".equals(name)) {
-            return new AnnotationVisitor(Opcodes.ASM5) {
-               @Override
-               public void visit(String name, Object value) {
-                  if (value instanceof String[]) {
-                     for (String val : (String[]) value) {
-                        m_transaction.addValue(val);
-                     }
-                  } else {
-                     m_transaction.addValue((String) value);
-                  }
-               }
-            };
-         }
-
-         return null;
       }
    }
 
@@ -241,6 +195,58 @@ public class CatModelBuilder {
                      }
                   } else {
                      m_event.addValue((String) value);
+                  }
+               }
+            };
+         }
+
+         return null;
+      }
+   }
+
+   private static class CatTransactionAnnotationVisitor extends AnnotationVisitor {
+      private TransactionModel m_transaction;
+
+      public CatTransactionAnnotationVisitor(TransactionModel transaction) {
+         super(Opcodes.ASM5);
+
+         m_transaction = transaction;
+      }
+
+      @Override
+      public void visit(String name, Object value) {
+         if ("type".equals(name)) {
+            m_transaction.setType((String) value);
+         } else if ("name".equals(name)) {
+            m_transaction.setName((String) value);
+         }
+      }
+
+      @Override
+      public AnnotationVisitor visitArray(String name) {
+         if ("keys".equals(name)) {
+            return new AnnotationVisitor(Opcodes.ASM5) {
+               @Override
+               public void visit(String name, Object value) {
+                  if (value instanceof String[]) {
+                     for (String val : (String[]) value) {
+                        m_transaction.addKey(val);
+                     }
+                  } else {
+                     m_transaction.addKey((String) value);
+                  }
+               }
+            };
+         } else if ("values".equals(name)) {
+            return new AnnotationVisitor(Opcodes.ASM5) {
+               @Override
+               public void visit(String name, Object value) {
+                  if (value instanceof String[]) {
+                     for (String val : (String[]) value) {
+                        m_transaction.addValue(val);
+                     }
+                  } else {
+                     m_transaction.addValue((String) value);
                   }
                }
             };

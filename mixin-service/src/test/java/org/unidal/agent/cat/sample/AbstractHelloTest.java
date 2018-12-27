@@ -18,19 +18,23 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
+import org.unidal.agent.cat.CatClassWeaver;
+import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.cat.message.Message;
 import org.unidal.cat.message.MessageTree;
 import org.unidal.cat.message.tree.io.MessageTreePool;
 import org.unidal.lookup.ContainerLoader;
 
 public abstract class AbstractHelloTest {
-   protected static Set<String> s_mixins = new LinkedHashSet<String>();
+   protected static Set<String> s_classNames = new LinkedHashSet<String>();
+
+   protected static Set<ClassModel> s_classModels = new LinkedHashSet<ClassModel>();
 
    protected static MyMessagePool s_pool = new MyMessagePool();
 
    @Before
    public void before() throws Exception {
-      initialize(s_mixins);
+      initialize(s_classNames);
 
       new SunJdkAttacher().loadAgent(MyAgent.class);
    }
@@ -71,7 +75,7 @@ public abstract class AbstractHelloTest {
       Assert.assertEquals(expectedames, s_pool.getNames());
    }
 
-   protected void initialize(Set<String> mixins) {
+   protected void initialize(Set<String> classNames) throws Exception {
       // override it
    }
 
@@ -97,14 +101,27 @@ public abstract class AbstractHelloTest {
    }
 
    public static class MyAgent {
-      public static void agentmain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException {
-         ClassTransformer transformer = new ClassTransformer(inst);
+      private static Instrumentation s_instrumentation;
 
-         for (String mixin : s_mixins) {
-            transformer.register(mixin);
+      public static Instrumentation getInstrumentation() {
+         return s_instrumentation;
+      }
+
+      public static void agentmain(String agentArgs, Instrumentation instrumentation)
+            throws UnmodifiableClassException {
+         ClassTransformer transformer = new ClassTransformer(instrumentation);
+         CatClassWeaver weaver = (CatClassWeaver) transformer.getWeaver(CatClassWeaver.ID);
+
+         for (String className : s_classNames) {
+            weaver.register(className);
          }
 
-         inst.addTransformer(transformer, false);
+         for (ClassModel model : s_classModels) {
+            weaver.register(model);
+         }
+
+         instrumentation.addTransformer(transformer, false);
+         s_instrumentation = instrumentation;
       }
    }
 

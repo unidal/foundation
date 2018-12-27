@@ -15,9 +15,16 @@ import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 
 public class MixinClassWeaver implements ClassWeaver {
+   public static final String ID = "mixin";
+
    private MixinModel m_mixin;
 
    private MixinModelBuilder m_builder = new MixinModelBuilder();
+
+   @Override
+   public String getId() {
+      return ID;
+   }
 
    @Override
    public JarFile initialize() {

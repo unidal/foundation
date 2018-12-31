@@ -31,8 +31,8 @@ public class ClassTransformer implements ClassFileTransformer {
 
    private synchronized void initialize() {
       if (!m_initialized.get()) {
-         initializeClasspath();
          m_initialized.set(true);
+         initializeClasspath();
       }
    }
 

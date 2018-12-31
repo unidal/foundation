@@ -18,6 +18,6 @@ public class ClassGeneratorTest {
       byte[] bytes = Files.forIO().readFrom(in);
       byte[] result = new MixinClassGenerator(model.findClass(name), bytes).generate(false);
 
-      Assert.assertEquals(2776, result.length);
+      Assert.assertEquals(3362, result.length);
    }
 }

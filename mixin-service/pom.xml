@@ -12,10 +12,6 @@
    <name>Mixin Service</name>
    <dependencies>
       <dependency>
-         <groupId>org.unidal.foundation</groupId>
-         <artifactId>foundation-service</artifactId>
-      </dependency>
-      <dependency>
          <groupId>org.ow2.asm</groupId>
          <artifactId>asm-util</artifactId>
       </dependency>
@@ -27,6 +23,11 @@
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.unidal.foundation</groupId>
+         <artifactId>foundation-service</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>
@@ -43,6 +44,9 @@
                      <Can-Redefine-Classes>true</Can-Redefine-Classes>
                      <Can-Retransform-Classes>true</Can-Retransform-Classes>
                   </manifestEntries>
+                  <manifest>
+                     <addClasspath>true</addClasspath>
+                  </manifest>
                </archive>
             </configuration>
          </plugin>

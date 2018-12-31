@@ -28,7 +28,6 @@ import org.unidal.agent.mixin.model.entity.MethodModel;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.entity.SourceModel;
 import org.unidal.agent.mixin.model.entity.TargetModel;
-import org.unidal.helper.Splitters;
 
 public class MixinModelBuilder {
    private Map<String, Boolean> m_classes = new LinkedHashMap<String, Boolean>();
@@ -108,7 +107,7 @@ public class MixinModelBuilder {
          properties.load(in);
 
          for (String name : properties.stringPropertyNames()) {
-            List<String> items = Splitters.by(',').noEmptyItem().trim().split(name);
+            List<String> items = split(name);
 
             for (String item : items) {
                if (item.startsWith("-")) {
@@ -135,9 +134,32 @@ public class MixinModelBuilder {
       m_classes.put(mixinClass, true);
    }
 
-   // for test case only
-   public void unregister(String mixinClass) {
-      m_classes.remove(mixinClass);
+   private List<String> split(String str) {
+      List<String> list = new ArrayList<String>();
+      char delimiter = ',';
+      int len = str.length();
+      StringBuilder sb = new StringBuilder(len);
+
+      for (int i = 0; i < len + 1; i++) {
+         char ch = i == len ? delimiter : str.charAt(i);
+
+         if (ch == delimiter) {
+            String item = sb.toString();
+
+            sb.setLength(0);
+            item = item.trim();
+
+            if (item.length() == 0) {
+               continue;
+            }
+
+            list.add(item);
+         } else {
+            sb.append(ch);
+         }
+      }
+
+      return list;
    }
 
    private static class InnerClassBuilder extends ClassVisitor {
@@ -156,7 +178,7 @@ public class MixinModelBuilder {
          try {
             ClassReader reader = new ClassReader(m_outerName);
             int flags = ClassReader.SKIP_FRAMES + ClassReader.SKIP_DEBUG + ClassReader.SKIP_CODE;
-            
+
             reader.accept(this, flags);
          } catch (Throwable e) {
             e.printStackTrace();

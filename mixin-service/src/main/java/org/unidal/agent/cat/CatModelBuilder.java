@@ -22,7 +22,6 @@ import org.unidal.agent.cat.model.entity.MethodModel;
 import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 import org.unidal.agent.cat.model.transform.BaseVisitor;
-import org.unidal.helper.Splitters;
 
 public class CatModelBuilder {
    private Map<String, Boolean> m_classNames = new LinkedHashMap<String, Boolean>();
@@ -61,7 +60,7 @@ public class CatModelBuilder {
             }
          }
       }
-      
+
       // step 3: add model from configuration center
       for (ClassModel model : m_classModels.values()) {
          root.addClass(model);
@@ -99,7 +98,7 @@ public class CatModelBuilder {
          properties.load(in);
 
          for (String name : properties.stringPropertyNames()) {
-            List<String> items = Splitters.by(',').noEmptyItem().trim().split(name);
+            List<String> items = split(name);
 
             for (String item : items) {
                if (item.startsWith("-")) {
@@ -128,6 +127,34 @@ public class CatModelBuilder {
 
    public void register(String className) {
       m_classNames.put(className, true);
+   }
+
+   private List<String> split(String str) {
+      List<String> list = new ArrayList<String>();
+      char delimiter = ',';
+      int len = str.length();
+      StringBuilder sb = new StringBuilder(len);
+
+      for (int i = 0; i < len + 1; i++) {
+         char ch = i == len ? delimiter : str.charAt(i);
+
+         if (ch == delimiter) {
+            String item = sb.toString();
+
+            sb.setLength(0);
+            item = item.trim();
+
+            if (item.length() == 0) {
+               continue;
+            }
+
+            list.add(item);
+         } else {
+            sb.append(ch);
+         }
+      }
+
+      return list;
    }
 
    private static class CatEnabledAnnotationVisitor extends AnnotationVisitor {

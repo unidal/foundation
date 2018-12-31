@@ -16,6 +16,7 @@ public class AllHelloTests extends AbstractHelloTest {
       classes.add(getClass().getPackage().getName() + ".hello.HelloMethod");
       classes.add(getClass().getPackage().getName() + ".hello.HelloOverride");
       classes.add(getClass().getPackage().getName() + ".hello.HelloReturnType");
+      classes.add(getClass().getPackage().getName() + ".hello.HelloLocalVariable");
    }
 
    @Before

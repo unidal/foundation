@@ -886,6 +886,19 @@ public class CatClassGenerator {
       }
 
       @Override
+      public void visitVarInsn(int opcode, int var) {
+         if (var >= m_ctx.getLocalVariables().indexOfTransaction()) {
+            if (opcode >= ILOAD && opcode <= ALOAD) {
+               var++;
+            } else if (opcode >= ISTORE && opcode <= ASTORE) {
+               var++;
+            }
+         }
+
+         super.visitVarInsn(opcode, var);
+      }
+
+      @Override
       public void visitMaxs(int maxStack, int maxLocals) {
          m_maxStack = maxStack;
          m_maxLocals = maxLocals + m_ctx.getLocalVariables().getNewVariables();

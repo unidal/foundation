@@ -23,9 +23,6 @@ import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
-import org.unidal.cat.Cat;
-import org.unidal.cat.message.Event;
-import org.unidal.cat.message.Transaction;
 
 public class CatClassGenerator {
    private Context m_ctx;
@@ -186,7 +183,7 @@ public class CatClassGenerator {
       }
 
       public String getBinaryCat() {
-         return Cat.class.getName().replace('.', '/');
+         return "org/unidal/cat/Cat"; // Cat.class.getName().replace('.', '/');
       }
 
       public String getBinaryClassName() {
@@ -194,11 +191,11 @@ public class CatClassGenerator {
       }
 
       public String getBinaryEvent() {
-         return Event.class.getName().replace('.', '/');
+         return "org/unidal/cat/message/Event"; // Event.class.getName().replace('.', '/');
       }
 
       public String getBinaryTransaction() {
-         return Transaction.class.getName().replace('.', '/');
+         return "org/unidal/cat/message/Transaction"; // Transaction.class.getName().replace('.', '/');
       }
 
       public byte[] getByteArray() {

@@ -15,6 +15,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.cat.CatEnabled;
 import org.unidal.agent.cat.CatEvent;
 import org.unidal.agent.cat.CatTransaction;
@@ -36,21 +37,15 @@ public class CatClassGenerator {
       m_reader = new ClassReader(classfileBuffer);
    }
 
-   private static boolean isDebug() {
-      return "true".equals(System.getProperty("CAT_DEBUG"));
-   }
-
    public byte[] generate(boolean redefined) {
       m_reader.accept(new ClassWrapper(m_ctx), ClassReader.SKIP_FRAMES);
 
       byte[] bytes = m_ctx.getByteArray();
 
-      if (isDebug()) {
-         System.out.println(m_ctx.getClassModel());
-         // ClassPrinter.print(new ClassReader(bytes));
-
+      if (AgentMain.isDebug()) {
          PrintWriter pw = new PrintWriter(System.out);
 
+         AgentMain.debug(m_ctx.getClassModel().toString());
          new ClassReader(bytes).accept(new TraceClassVisitor(null, new ASMifier(), pw), ClassReader.SKIP_DEBUG);
       }
 
@@ -82,10 +77,6 @@ public class CatClassGenerator {
          MethodModel method = m_ctx.findMethod(name, desc);
 
          if (method != null) {
-            if (isDebug()) {
-               System.out.println(String.format("Visit %s%s of %s ...", name, desc, m_ctx.getClassModel().getName()));
-            }
-
             if (method.getTransaction() != null) {
                MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 

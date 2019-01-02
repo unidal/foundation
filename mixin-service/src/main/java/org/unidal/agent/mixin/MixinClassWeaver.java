@@ -8,6 +8,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.ClassWeaver;
 import org.unidal.agent.mixin.asm.MixinClassGenerator;
 import org.unidal.agent.mixin.asm.MixinJarFileBuilder;
@@ -65,7 +66,7 @@ public class MixinClassWeaver implements ClassWeaver {
       ClassModel model = m_mixin.findClass(className);
       byte[] result = new MixinClassGenerator(model, classfileBuffer).generate(redefined);
 
-      System.out.println(String.format("[Mixin] Class(%s) is transformed.", className));
+      AgentMain.info("[Mixin] Class(%s) is transformed.", className);
       return result;
    }
 

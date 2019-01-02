@@ -17,6 +17,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.mixin.model.entity.InnerClassModel;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.entity.SourceModel;
@@ -71,7 +72,7 @@ public class MixinJarFileBuilder {
             throw new IllegalStateException("Error when adding to mixin jar for " + path, e);
          }
 
-         if ("true".equals(System.getProperty("MIXIN_JARFILE_DEBUG"))) {
+         if (AgentMain.isDebug()) {
             PrintWriter pw = new PrintWriter(System.out);
 
             new ClassReader(content).accept(new TraceClassVisitor(null, new ASMifier(), pw), ClassReader.SKIP_DEBUG);

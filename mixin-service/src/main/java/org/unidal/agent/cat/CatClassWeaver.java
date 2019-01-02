@@ -8,6 +8,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.ClassWeaver;
 import org.unidal.agent.cat.asm.CatClassGenerator;
 import org.unidal.agent.cat.model.entity.ClassModel;
@@ -55,7 +56,7 @@ public class CatClassWeaver implements ClassWeaver {
          }
       } catch (Exception e) {
          // ignore it
-         e.printStackTrace();
+         new RuntimeException(String.format("Unable to register class(%s)!", className), e).printStackTrace();
       }
    }
 
@@ -64,7 +65,7 @@ public class CatClassWeaver implements ClassWeaver {
       ClassModel model = m_model.findClass(className);
       byte[] result = new CatClassGenerator(model, classfileBuffer).generate(redefined);
 
-      System.out.println(String.format("[CAT] Class(%s) is transformed.", className));
+      AgentMain.info("[CAT] Class(%s) is transformed.", className);
       return result;
    }
 

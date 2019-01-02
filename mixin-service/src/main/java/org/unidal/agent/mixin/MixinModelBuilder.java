@@ -333,10 +333,6 @@ public class MixinModelBuilder {
 
       @Override
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-         // if (name.equals("<clinit>") || name.equals("<init>")) {
-         // return null;
-         // }
-
          MethodModel method = new MethodModel();
 
          method.setAccess(access);

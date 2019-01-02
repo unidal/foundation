@@ -15,6 +15,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.mixin.MixinMeta;
 import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.FieldModel;
@@ -44,12 +45,10 @@ public class MixinClassGenerator {
 
       byte[] bytes = m_ctx.getByteArray();
 
-      if ("true".equals(System.getProperty("MIXIN_DEBUG"))) {
-         System.out.println(m_ctx.getClassModel());
-         // ClassPrinter.print(new ClassReader(bytes));
-
+      if (AgentMain.isDebug()) {
          PrintWriter pw = new PrintWriter(System.out);
 
+         System.out.println(m_ctx.getClassModel());
          new ClassReader(bytes).accept(new TraceClassVisitor(null, new ASMifier(), pw), ClassReader.SKIP_DEBUG);
       }
 

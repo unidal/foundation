@@ -52,23 +52,13 @@ public class SunJdkAttacher {
       return manifest;
    }
 
-   private void debug(String pattern, Object... args) {
-      if ("true".equals(System.getProperty("MIXIN_DEBUG"))) {
-         if (args.length == 0) {
-            System.out.println(pattern);
-         } else {
-            System.out.println(String.format(pattern, args));
-         }
-      }
-   }
-
    private String getAgentJarPath(Class<?> agentClass) throws IOException, URISyntaxException {
       CodeSource codeSource = agentClass.getProtectionDomain().getCodeSource();
       String path = codeSource.getLocation().toURI().getPath();
       File file = new File(path);
 
       if (file.isFile()) { // jar file
-         debug("Agent jar is %s", file.getCanonicalPath());
+         AgentMain.debug("Agent jar is %s", file.getCanonicalPath());
          return file.getCanonicalPath();
       } else { // directory
          File tmpJar = File.createTempFile("agent-", ".jar");
@@ -88,7 +78,7 @@ public class SunJdkAttacher {
 
          String jarPath = tmpJar.getCanonicalPath();
 
-         debug("Agent jar is %s", jarPath);
+         AgentMain.debug("Agent jar is %s", jarPath);
          return jarPath;
       }
    }
@@ -98,7 +88,7 @@ public class SunJdkAttacher {
       int index = jvmName.indexOf('@');
       String pid = index < 0 ? null : jvmName.substring(0, index);
 
-      debug("Current PID is %s", pid);
+      AgentMain.debug("Current PID is %s", pid);
       return pid;
    }
 
@@ -107,10 +97,10 @@ public class SunJdkAttacher {
       File toolsJarFile = new File(javaHome, "../lib/tools.jar");
 
       if (!toolsJarFile.isFile()) {
-         debug("lib/tools.jar does not found.");
+         AgentMain.debug("lib/tools.jar does not found.");
          throw new IllegalStateException("This feature is only available under Sun JDK 1.6 and above!");
       } else {
-         debug("Tools jar is %s", toolsJarFile.getCanonicalPath());
+         AgentMain.debug("Tools jar is %s", toolsJarFile.getCanonicalPath());
       }
 
       URL url = toolsJarFile.toURI().toURL();
@@ -131,22 +121,22 @@ public class SunJdkAttacher {
          // 2. attach the given agent
          clazz = toolsClassLoader.loadClass("com.sun.tools.attach.VirtualMachine");
          vm = clazz.getMethod("attach", String.class).invoke(null, pid);
-         debug("JDK attached");
+         AgentMain.debug("JDK attached");
 
          // 3. load agent
          String agentJarPath = getAgentJarPath(agentClass);
 
          System.setProperty("agent.jar.path", agentJarPath);
          vm.getClass().getMethod("loadAgent", String.class).invoke(vm, agentJarPath);
-         debug("Java Agent loaded");
+         AgentMain.debug("Java Agent loaded");
       } catch (Exception e) {
-         debug(e.getMessage());
+         AgentMain.debug(e.getMessage());
          e.printStackTrace();
       } finally {
          if (vm != null) {
             // 3. detach from the VM
             clazz.getMethod("detach").invoke(vm);
-            debug("JDK dettached");
+            AgentMain.debug("JDK dettached");
          }
       }
    }

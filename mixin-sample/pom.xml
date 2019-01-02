@@ -14,19 +14,16 @@
       <dependency>
          <groupId>org.unidal.foundation</groupId>
          <artifactId>mixin-service</artifactId>
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>org.unidal.cat</groupId>
          <artifactId>cat</artifactId>
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.unidal.foundation</groupId>
-         <artifactId>foundation-service</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>

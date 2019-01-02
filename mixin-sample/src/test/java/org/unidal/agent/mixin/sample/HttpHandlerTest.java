@@ -6,7 +6,6 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.objectweb.asm.util.ASMifier;
 import org.unidal.agent.AgentMain;
 import org.unidal.agent.SunJdkAttacher;
 import org.unidal.agent.mixin.MixinModelAggregator;
@@ -15,6 +14,7 @@ import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.transform.DefaultSaxParser;
 import org.unidal.agent.mixin.sample.protocol.HttpHandlerMixin;
+import org.unidal.asm.AsmPrinter;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 import org.xml.sax.SAXException;
@@ -23,7 +23,7 @@ public class HttpHandlerTest {
    @Test
    @Ignore
    public void dump() throws Exception {
-      ASMifier.main(new String[] { HttpHandlerMixin.class.getName() });
+      AsmPrinter.print(HttpHandlerMixin.class);
    }
 
    @Test

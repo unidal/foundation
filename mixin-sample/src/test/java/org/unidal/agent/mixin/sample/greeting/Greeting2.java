@@ -1,8 +1,8 @@
 package org.unidal.agent.mixin.sample.greeting;
 
-import org.objectweb.asm.util.ASMifier;
 import org.unidal.agent.cat.CatEnabled;
 import org.unidal.agent.cat.CatTransaction;
+import org.unidal.asm.AsmPrinter;
 import org.unidal.cat.Cat;
 import org.unidal.cat.message.Transaction;
 
@@ -11,7 +11,7 @@ public class Greeting2 {
    private static boolean DEBUG = true;
 
    public static void main(String[] args) throws Exception {
-      ASMifier.main(new String[] { Greeting2.class.getName() });
+      AsmPrinter.print(Greeting2.class);
    }
 
    @CatTransaction(type = "${class}", name = "${method}", status = "${return}:200,201", //

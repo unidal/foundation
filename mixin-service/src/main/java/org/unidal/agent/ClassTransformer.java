@@ -40,7 +40,7 @@ public class ClassTransformer implements ClassFileTransformer {
       List<JarFile> jarFiles = m_manager.initialize();
 
       for (JarFile jarFile : jarFiles) {
-         AgentMain.debug("Added jar(%s) to class path.", jarFile.getName());
+         AgentMain.debug("Appended generated jar(%s) to bootstrap class path.", jarFile.getName());
          m_instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
       }
    }

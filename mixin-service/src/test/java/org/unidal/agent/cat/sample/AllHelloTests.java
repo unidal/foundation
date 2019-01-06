@@ -21,6 +21,8 @@ public class AllHelloTests extends AbstractHelloTest {
 
    @Before
    public void before() throws Exception {
+      System.setProperty("AGENT_DEBUG", "false");
+
       initialize(s_classNames);
 
       new SunJdkAttacher().loadAgent(MyAgent.class);

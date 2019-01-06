@@ -40,22 +40,33 @@ public class AgentMain {
    }
 
    private static synchronized void main(String agentArgs, Instrumentation instrumentation) {
-      if (s_instrumentation != null) {
-         ClassTransformer transformer = new ClassTransformer(instrumentation);
-         String agentJarPath = System.getProperty("agent.jar.path");
+      if (s_instrumentation == null) {
 
-         if (agentJarPath != null) {
-            try {
-               debug("Added jar(%s) to class path.", agentJarPath);
-               instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(agentJarPath));
-            } catch (Exception e) {
-               // ignore it
-               e.printStackTrace();
+         try {
+            String agentJarPath = System.getProperty("agent.jar.path");
+
+            if (agentJarPath != null) { // for test case
+               try {
+                  instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(agentJarPath));
+                  debug("Appended agent jar(%s) to bootstrap class path.", agentJarPath);
+               } catch (Exception e) {
+                  // ignore it
+                  e.printStackTrace();
+               }
+            } else {
+               String file = AgentMain.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+
+               instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(file));
+               debug("Appended agent jar(%s) to bootstrap class path.", file);
             }
-         }
 
-         instrumentation.addTransformer(transformer, true);
-         s_instrumentation = instrumentation;
+            ClassTransformer transformer = new ClassTransformer(instrumentation);
+
+            instrumentation.addTransformer(transformer, true);
+            s_instrumentation = instrumentation;
+         } catch (Throwable e) {
+            e.printStackTrace();
+         }
       }
    }
 

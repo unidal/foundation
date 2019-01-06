@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -16,6 +17,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 public class SunJdkAttacher {
+   private static final AtomicBoolean s_initialized = new AtomicBoolean();
+
    private void addToJar(JarOutputStream out, File baseDir, String path) throws IOException {
       File file = new File(baseDir, path);
 
@@ -110,6 +113,12 @@ public class SunJdkAttacher {
    }
 
    public void loadAgent(Class<?> agentClass) throws Exception {
+      if (s_initialized.get()) {
+         return;
+      }
+
+      s_initialized.set(true);
+
       Object vm = null;
       Class<?> clazz = null;
 
@@ -121,14 +130,14 @@ public class SunJdkAttacher {
          // 2. attach the given agent
          clazz = toolsClassLoader.loadClass("com.sun.tools.attach.VirtualMachine");
          vm = clazz.getMethod("attach", String.class).invoke(null, pid);
-         AgentMain.debug("JDK attached");
+         AgentMain.debug("Attached to JVM(%s)", vm.getClass().getName());
 
          // 3. load agent
          String agentJarPath = getAgentJarPath(agentClass);
 
          System.setProperty("agent.jar.path", agentJarPath);
          vm.getClass().getMethod("loadAgent", String.class).invoke(vm, agentJarPath);
-         AgentMain.debug("Java Agent loaded");
+         AgentMain.debug("Java agent(%s) loaded", agentClass.getName());
       } catch (Exception e) {
          AgentMain.debug(e.getMessage());
          e.printStackTrace();
@@ -136,7 +145,7 @@ public class SunJdkAttacher {
          if (vm != null) {
             // 3. detach from the VM
             clazz.getMethod("detach").invoke(vm);
-            AgentMain.debug("JDK dettached");
+            AgentMain.debug("Dettached from JVM(%s)", vm.getClass().getName());
          }
       }
    }

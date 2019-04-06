@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.agent.mixin.MixinModelBuilder;
+import org.unidal.agent.mixin.asm.MixinModelBuilder;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.transform.DefaultSaxParser;
 import org.unidal.agent.mixin.sample.greeting.GreetingMixin;

@@ -47,10 +47,4 @@ public class ClassWeaverManager {
 
       return jarFiles;
    }
-
-   public void register(String className) {
-      for (ClassWeaver weaver : m_weavers.values()) {
-         weaver.register(className);
-      }
-   }
 }

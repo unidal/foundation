@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
+import org.unidal.agent.mixin.MixinClassWeaver;
 import org.unidal.agent.mixin.sample.greeting.Greeting;
 
 public class GreetingTest {
@@ -66,9 +67,10 @@ public class GreetingTest {
    public static class MockAgent {
       public static void agentmain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException {
          ClassTransformer transformer = new ClassTransformer(inst);
+         MixinClassWeaver weaver = (MixinClassWeaver) transformer.getWeaver(MixinClassWeaver.ID);
 
          for (String mixin : s_mixins) {
-            transformer.register(mixin);
+            weaver.getBuilder().register(mixin);
          }
 
          inst.addTransformer(transformer, false);

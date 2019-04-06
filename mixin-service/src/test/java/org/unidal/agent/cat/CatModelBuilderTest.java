@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.unidal.agent.cat.asm.CatModelBuilder;
 import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
 import org.xml.sax.SAXException;
@@ -18,7 +19,9 @@ public class CatModelBuilderTest {
 
       builder.register(HelloService.class.getName());
 
-      RootModel actual = builder.build();
+      RootModel actual = new RootModel();
+
+      builder.build(actual);
 
       Assert.assertEquals(expected.toString(), actual.toString());
    }

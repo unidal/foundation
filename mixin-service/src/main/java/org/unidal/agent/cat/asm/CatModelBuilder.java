@@ -1,9 +1,10 @@
-package org.unidal.agent.cat;
+package org.unidal.agent.cat.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,9 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.unidal.agent.cat.CatEnabled;
+import org.unidal.agent.cat.CatEvent;
+import org.unidal.agent.cat.CatTransaction;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
@@ -34,8 +38,7 @@ public class CatModelBuilder {
       return clazz.getName().equals(type.getClassName());
    }
 
-   public RootModel build() {
-      RootModel root = new RootModel();
+   public void build(RootModel root) {
       List<URL> urls = getConfigurations();
 
       // step 1: collect cat classes from META-INF/cat.properties in the class paths
@@ -68,18 +71,22 @@ public class CatModelBuilder {
 
       // step 4: remove unrelated method
       root.accept(new MethodRemovalVisitor());
-
-      return root;
    }
 
    private List<URL> getConfigurations() {
       List<URL> urls = new ArrayList<URL>();
 
       try {
-         Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/cat.properties");
+         ClassLoader loader = getClass().getClassLoader();
 
-         while (resources.hasMoreElements()) {
-            urls.add(resources.nextElement());
+         if (loader != null) {
+            Enumeration<URL> r2 = loader.getResources("META-INF/cat.properties");
+
+            urls.addAll(Collections.list(r2));
+         } else {
+            Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.properties");
+
+            urls.addAll(Collections.list(r1));
          }
       } catch (Throwable e) {
          // ignore it
@@ -126,7 +133,19 @@ public class CatModelBuilder {
    }
 
    public void register(String className) {
-      m_classNames.put(className, true);
+      try {
+         ClassReader reader = new ClassReader(className.replace('.', '/'));
+         CatMetaRecognizer recognizer = new CatMetaRecognizer();
+
+         reader.accept(recognizer, ClassReader.SKIP_FRAMES + ClassReader.SKIP_CODE + ClassReader.SKIP_DEBUG);
+
+         if (recognizer.isFound()) {
+            m_classNames.put(className, true);
+         }
+      } catch (Exception e) {
+         // ignore it
+         new RuntimeException(String.format("Unable to register class(%s)!", className), e).printStackTrace();
+      }
    }
 
    private List<String> split(String str) {
@@ -178,7 +197,7 @@ public class CatModelBuilder {
          }
       }
    }
-
+   
    private static class CatEventAnnotationVisitor extends AnnotationVisitor {
       private EventModel m_event;
 
@@ -222,6 +241,38 @@ public class CatModelBuilder {
                      }
                   } else {
                      m_event.addValue((String) value);
+                  }
+               }
+            };
+         }
+
+         return null;
+      }
+   }
+
+   private static class CatMetaRecognizer extends ClassVisitor {
+      private boolean m_found;
+
+      public CatMetaRecognizer() {
+         super(Opcodes.ASM5);
+      }
+
+      public boolean isFound() {
+         return m_found;
+      }
+
+      @Override
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+         Type type = Type.getType(desc);
+
+         if (CatEnabled.class.getName().equals(type.getClassName())) {
+            m_found = true;
+
+            return new AnnotationVisitor(Opcodes.ASM5) {
+               @Override
+               public void visit(String name, Object value) {
+                  if (name.equals("value") && Boolean.FALSE.equals(value)) {
+                     m_found = false;
                   }
                }
             };

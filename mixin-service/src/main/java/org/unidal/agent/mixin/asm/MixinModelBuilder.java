@@ -1,4 +1,4 @@
-package org.unidal.agent.mixin;
+package org.unidal.agent.mixin.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +21,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
+import org.unidal.agent.mixin.MixinMeta;
 import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.FieldModel;
 import org.unidal.agent.mixin.model.entity.InnerClassModel;
@@ -65,7 +66,9 @@ public class MixinModelBuilder {
          try {
             new TargetModelBuilder().build(classModel);
          } catch (Throwable t) {
-            t.printStackTrace();
+            String message = String.format("Error when building mixin model for class(%s)!", classModel.getClazz());
+
+            new RuntimeException(message, t).printStackTrace();
          }
       }
 
@@ -85,10 +88,16 @@ public class MixinModelBuilder {
       List<URL> urls = new ArrayList<URL>();
 
       try {
-         Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/mixin.properties");
+         ClassLoader loader = getClass().getClassLoader();
 
-         while (resources.hasMoreElements()) {
-            urls.add(resources.nextElement());
+         if (loader != null) {
+            Enumeration<URL> r2 = loader.getResources("META-INF/mixin.properties");
+
+            urls.addAll(Collections.list(r2));
+         } else {
+            Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/mixin.properties");
+
+            urls.addAll(Collections.list(r1));
          }
       } catch (Throwable e) {
          // ignore it
@@ -131,7 +140,19 @@ public class MixinModelBuilder {
    }
 
    public void register(String mixinClass) {
-      m_classes.put(mixinClass, true);
+      try {
+         ClassReader reader = new ClassReader(mixinClass.replace('.', '/'));
+         MixinMetaRecognizer recognizer = new MixinMetaRecognizer();
+
+         reader.accept(recognizer, ClassReader.SKIP_FRAMES + ClassReader.SKIP_CODE + ClassReader.SKIP_DEBUG);
+
+         if (recognizer.isFound()) {
+            m_classes.put(mixinClass, true);
+         }
+      } catch (Exception e) {
+         // ignore it
+         e.printStackTrace();
+      }
    }
 
    private List<String> split(String str) {
@@ -199,6 +220,29 @@ public class MixinModelBuilder {
                new InnerClassBuilder(m_sourceModel, name).build();
             }
          }
+      }
+   }
+
+   private static class MixinMetaRecognizer extends ClassVisitor {
+      private boolean m_found;
+
+      public MixinMetaRecognizer() {
+         super(Opcodes.ASM5);
+      }
+
+      public boolean isFound() {
+         return m_found;
+      }
+
+      @Override
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+         Type type = Type.getType(desc);
+
+         if (MixinMeta.class.getName().equals(type.getClassName())) {
+            m_found = true;
+         }
+
+         return null;
       }
    }
 
@@ -312,11 +356,26 @@ public class MixinModelBuilder {
 
       public void build(ClassModel classModel) throws IOException {
          String className = classModel.getClazz().replace('.', '/');
+         ClassReader reader = readClass(className);
          int flags = ClassReader.SKIP_FRAMES + ClassReader.SKIP_DEBUG + ClassReader.SKIP_CODE;
 
          m_targetModel = new TargetModel(className);
-         new ClassReader(className).accept(this, flags);
+         reader.accept(this, flags);
          classModel.setTarget(m_targetModel);
+      }
+
+      private ClassReader readClass(String className) throws IOException {
+         try {
+            return new ClassReader(className);
+         } catch (IOException e) {
+            InputStream in = getClass().getResourceAsStream("/" + className + ".class");
+
+            if (in == null) {
+               in = Thread.currentThread().getContextClassLoader().getResourceAsStream("/" + className + ".class");
+            }
+
+            return new ClassReader(in);
+         }
       }
 
       @Override

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.agent.mixin.MixinModelAggregator;
+import org.unidal.agent.mixin.asm.MixinModelAggregator;
 import org.unidal.agent.mixin.model.entity.MixinModel;
 import org.unidal.agent.mixin.model.transform.DefaultSaxParser;
 import org.xml.sax.SAXException;

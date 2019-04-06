@@ -39,12 +39,4 @@ public interface ClassWeaver {
     * @throws IOException
     */
    public byte[] weave(String className, byte[] classfileBuffer, boolean redefined) throws IOException;
-
-   /**
-    * Try to register a <code>className</code>, do nothing if not eligible.
-    * 
-    * @param className
-    *           class to weave. i.e. "org.unidal.agent.mixin.sample.greeting.GreetingMixin"
-    */
-   public void register(String className);
 }

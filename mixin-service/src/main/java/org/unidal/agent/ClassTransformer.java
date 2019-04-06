@@ -45,10 +45,6 @@ public class ClassTransformer implements ClassFileTransformer {
       }
    }
 
-   public void register(String className) {
-      m_manager.register(className);
-   }
-
    @Override
    public byte[] transform(ClassLoader loader, String binaryClassName, Class<?> classBeingRedefined,
          ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {

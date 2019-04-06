@@ -113,11 +113,11 @@ public abstract class AbstractHelloTest {
          CatClassWeaver weaver = (CatClassWeaver) transformer.getWeaver(CatClassWeaver.ID);
 
          for (String className : s_classNames) {
-            weaver.register(className);
+            weaver.getBuilder().register(className);
          }
 
          for (ClassModel model : s_classModels) {
-            weaver.register(model);
+            weaver.getBuilder().register(model);
          }
 
          instrumentation.addTransformer(transformer, false);

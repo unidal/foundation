@@ -1,16 +1,19 @@
 package org.unidal.lookup;
 
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.unidal.lookup.container.MyPlexusContainer;
 
 public class ContainerLoader {
-   private static volatile PlexusContainer s_container;
+   private static AtomicReference<PlexusContainer> s_container = new AtomicReference<PlexusContainer>(null);
 
    public static void destroy() {
-      if (s_container != null) {
-         s_container.dispose();
-         s_container = null;
+      PlexusContainer container = s_container.get();
+
+      if (container != null) {
+         container.dispose();
+         s_container.set(null);
       }
    }
 
@@ -18,27 +21,27 @@ public class ContainerLoader {
       return getDefaultContainer(null);
    }
 
-   	public static PlexusContainer getDefaultContainer(String configuration) {
-		if (s_container == null) {
-			synchronized (ContainerLoader.class) {
-				if (s_container == null) {
-					try {
-						if (configuration != null) {
-							InputStream in = ContainerLoader.class.getClassLoader().getResourceAsStream(configuration);
+   public static PlexusContainer getDefaultContainer(String configuration) {
+      if (s_container.get() == null) {
+         synchronized (ContainerLoader.class) {
+            if (s_container.get() == null) {
+               try {
+                  if (configuration != null) {
+                     InputStream in = ContainerLoader.class.getClassLoader().getResourceAsStream(configuration);
 
-							s_container = new MyPlexusContainer(in);
-						} else {
-							s_container = new MyPlexusContainer();
-						}
-					} catch (Exception e) {
-						throw new RuntimeException("Unable to create Plexus container!", e);
-					}
-				}
-			}
-		}
+                     s_container.set(new MyPlexusContainer(in));
+                  } else {
+                     s_container.set(new MyPlexusContainer());
+                  }
+               } catch (Exception e) {
+                  throw new RuntimeException("Unable to create Plexus container!", e);
+               }
+            }
+         }
+      }
 
-		return s_container;
-	}
+      return s_container.get();
+   }
 
    static class Key {
       private Class<?> m_role;

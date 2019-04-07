@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.unidal.agent.SunJdkAttacher;
 
-public class AllHelloTests extends AbstractHelloTest {
+public class AllSmapleTests extends AbstractHelloTest {
    @Override
    protected void initialize(Set<String> classes) {
       classes.add(getClass().getPackage().getName() + ".hello.HelloAnnotation");
@@ -38,5 +38,7 @@ public class AllHelloTests extends AbstractHelloTest {
       new HelloOverrideTest().test();
       new HelloReturnTypeTest().test();
       new HelloModelTest().test();
+
+      new SnoopTest().test();
    }
 }

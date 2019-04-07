@@ -3,7 +3,6 @@ package org.unidal.agent.cat.sample;
 import java.util.Set;
 
 import org.junit.Test;
-import org.unidal.agent.cat.sample.greeting.Greeting;
 
 public class HelloOverrideTest extends AbstractHelloTest {
    @Override
@@ -15,12 +14,12 @@ public class HelloOverrideTest extends AbstractHelloTest {
 
    @Test
    public void test() throws Exception {
-      Greeting greeting = new Greeting();
+      Hello greeting = new Hello();
 
-      greeting.sayHello("Frankie");
-      greeting.sayBye("Frankie");
+      greeting.hello("Frankie");
+      greeting.bye("Frankie");
 
-      expect("<init>, sayHello, sayBye");
+      expect("<init>, hello, bye");
 
       Thread.sleep(20);
    }

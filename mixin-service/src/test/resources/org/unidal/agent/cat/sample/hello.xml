@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<class name="org.unidal.agent.cat.sample.greeting.Greeting">
+<class name="org.unidal.agent.cat.sample.greeting.Hello">
    <method name="&lt;init&gt;" desc="()V">
       <transaction type="Greeting" name="${method}">
       </transaction>
    </method>
-   <method name="sayBye" desc="(Ljava/lang/String;)Ljava/lang/String;">
-      <transaction type="Greeting" name="${method}">
+   <method name="bye" desc="(Ljava/lang/String;)Ljava/lang/String;">
+      <transaction type="Hello" name="${method}">
          <key>arg0</key>
          <key>return</key>
          <value>${arg0}</value>
          <value>${return}</value>
       </transaction>
    </method>
-   <method name="sayHello" desc="(Ljava/lang/String;)Ljava/lang/String;">
-      <transaction type="Greeting" name="${method}">
+   <method name="hello" desc="(Ljava/lang/String;)Ljava/lang/String;">
+      <transaction type="Hello" name="${method}">
          <key>arg0</key>
          <key>return</key>
          <value>${arg0}</value>

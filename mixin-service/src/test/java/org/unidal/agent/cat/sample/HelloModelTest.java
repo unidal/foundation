@@ -6,11 +6,10 @@ import java.util.Set;
 import org.junit.Test;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
-import org.unidal.agent.cat.sample.greeting.Greeting;
 
 public class HelloModelTest extends AbstractHelloTest {
    protected void initialize(Set<String> classNames) throws Exception {
-      InputStream in = getClass().getResourceAsStream("greeting.xml");
+      InputStream in = getClass().getResourceAsStream("hello.xml");
       ClassModel model = DefaultSaxParser.parseEntity(ClassModel.class, in);
 
       s_classModels.add(model);
@@ -18,12 +17,21 @@ public class HelloModelTest extends AbstractHelloTest {
 
    @Test
    public void test() throws Exception {
-      Greeting greeting = new Greeting();
+      Hello hello = new Hello();
 
-      greeting.sayHello("Frankie");
-      greeting.sayBye("Frankie");
+      hello.hello("Frankie");
+      hello.bye("Frankie");
 
-      expect("<init>, sayHello, sayBye");
+      expect("<init>, hello, bye");
+
+      Thread.sleep(20);
+   }
+
+   @Test
+   public void testSnoop() throws Exception {
+      new Snoop().snoop();
+
+      expect("<init>, snoop");
 
       Thread.sleep(20);
    }

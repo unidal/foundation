@@ -71,8 +71,8 @@ public abstract class AbstractHelloTest {
       return params;
    }
 
-   protected void expect(String expectedames) {
-      Assert.assertEquals(expectedames, s_pool.getNames());
+   protected void expect(String expectedNames) {
+      Assert.assertEquals(expectedNames, s_pool.getNames());
    }
 
    protected void initialize(Set<String> classNames) throws Exception {

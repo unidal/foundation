@@ -26,6 +26,7 @@ import org.unidal.agent.cat.model.entity.MethodModel;
 import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 import org.unidal.agent.cat.model.transform.BaseVisitor;
+import org.unidal.agent.cat.model.transform.DefaultSaxParser;
 
 public class CatModelBuilder {
    private Map<String, Boolean> m_classNames = new LinkedHashMap<String, Boolean>();
@@ -39,93 +40,8 @@ public class CatModelBuilder {
    }
 
    public void build(RootModel root) {
-      List<URL> urls = getConfigurations();
-
-      // step 1: collect cat classes from META-INF/cat.properties in the class paths
-      for (URL url : urls) {
-         try {
-            loadClassNames(url, m_classNames);
-         } catch (Throwable t) {
-            t.printStackTrace();
-         }
-      }
-
-      // step 2: build model for cat classes
-      for (Map.Entry<String, Boolean> e : m_classNames.entrySet()) {
-         if (e.getValue().booleanValue()) { // open
-            try {
-               ClassModel model = new ClassModel(e.getKey());
-
-               new ClassModelBuilder(model).build();
-               root.addClass(model);
-            } catch (Throwable t) {
-               t.printStackTrace();
-            }
-         }
-      }
-
-      // step 3: add model from configuration center
-      for (ClassModel model : m_classModels.values()) {
-         root.addClass(model);
-      }
-
-      // step 4: remove unrelated method
-      root.accept(new MethodRemovalVisitor());
-   }
-
-   private List<URL> getConfigurations() {
-      List<URL> urls = new ArrayList<URL>();
-
-      try {
-         ClassLoader loader = getClass().getClassLoader();
-
-         if (loader != null) {
-            Enumeration<URL> r2 = loader.getResources("META-INF/cat.properties");
-
-            urls.addAll(Collections.list(r2));
-         } else {
-            Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.properties");
-
-            urls.addAll(Collections.list(r1));
-         }
-      } catch (Throwable e) {
-         // ignore it
-         e.printStackTrace();
-      }
-
-      return urls;
-   }
-
-   private void loadClassNames(URL url, Map<String, Boolean> classes) throws IOException {
-      InputStream in = url.openStream();
-
-      try {
-         Properties properties = new Properties();
-
-         properties.load(in);
-
-         for (String name : properties.stringPropertyNames()) {
-            List<String> items = split(name);
-
-            for (String item : items) {
-               if (item.startsWith("-")) {
-                  classes.put(item.substring(1), false);
-               } else {
-                  Boolean open = classes.get(item);
-
-                  if (open == null || open.booleanValue()) {
-                     classes.put(item, true);
-                  }
-               }
-            }
-         }
-      } finally {
-         try {
-            in.close();
-         } catch (IOException e) {
-            // ignore it
-         }
-      }
+      new CatPropertiesLoader().build(root);
+      new CatModelLoader().build(root);
    }
 
    public void register(ClassModel classModel) {
@@ -197,7 +113,7 @@ public class CatModelBuilder {
          }
       }
    }
-   
+
    private static class CatEventAnnotationVisitor extends AnnotationVisitor {
       private EventModel m_event;
 
@@ -279,6 +195,138 @@ public class CatModelBuilder {
          }
 
          return null;
+      }
+   }
+
+   private class CatModelLoader {
+      public void build(RootModel root) {
+         // step 1: collect configure from META-INF/cat.xml in the class paths
+         List<URL> urls = getConfigurations();
+
+         for (URL url : urls) {
+            try {
+               ClassModel model = DefaultSaxParser.parseEntity(ClassModel.class, url.openStream());
+
+               root.addClass(model);
+            } catch (Throwable t) {
+               t.printStackTrace();
+            }
+         }
+      }
+
+      private List<URL> getConfigurations() {
+         List<URL> urls = new ArrayList<URL>();
+
+         try {
+            ClassLoader loader = getClass().getClassLoader();
+
+            if (loader != null) {
+               Enumeration<URL> r2 = loader.getResources("META-INF/cat.xml");
+
+               urls.addAll(Collections.list(r2));
+            } else {
+               Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.xml");
+
+               urls.addAll(Collections.list(r1));
+            }
+         } catch (Throwable e) {
+            // ignore it
+            e.printStackTrace();
+         }
+
+         return urls;
+      }
+   }
+
+   private class CatPropertiesLoader {
+      public void build(RootModel root) {
+         // step 1: collect cat classes from META-INF/cat.properties in the class paths
+         List<URL> urls = getConfigurations();
+
+         for (URL url : urls) {
+            try {
+               loadClassNames(url, m_classNames);
+            } catch (Throwable t) {
+               t.printStackTrace();
+            }
+         }
+
+         // step 2: build model for cat classes
+         for (Map.Entry<String, Boolean> e : m_classNames.entrySet()) {
+            if (e.getValue().booleanValue()) { // open
+               try {
+                  ClassModel model = new ClassModel(e.getKey());
+
+                  new ClassModelBuilder(model).build();
+                  root.addClass(model);
+               } catch (Throwable t) {
+                  t.printStackTrace();
+               }
+            }
+         }
+
+         // step 3: add model from configuration center
+         for (ClassModel model : m_classModels.values()) {
+            root.addClass(model);
+         }
+
+         // step 4: remove unrelated method
+         root.accept(new MethodRemovalVisitor());
+      }
+
+      private List<URL> getConfigurations() {
+         List<URL> urls = new ArrayList<URL>();
+
+         try {
+            ClassLoader loader = getClass().getClassLoader();
+
+            if (loader != null) {
+               Enumeration<URL> r2 = loader.getResources("META-INF/cat.properties");
+
+               urls.addAll(Collections.list(r2));
+            } else {
+               Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.properties");
+
+               urls.addAll(Collections.list(r1));
+            }
+         } catch (Throwable e) {
+            // ignore it
+            e.printStackTrace();
+         }
+
+         return urls;
+      }
+
+      private void loadClassNames(URL url, Map<String, Boolean> classes) throws IOException {
+         InputStream in = url.openStream();
+
+         try {
+            Properties properties = new Properties();
+
+            properties.load(in);
+
+            for (String name : properties.stringPropertyNames()) {
+               List<String> items = split(name);
+
+               for (String item : items) {
+                  if (item.startsWith("-")) {
+                     classes.put(item.substring(1), false);
+                  } else {
+                     Boolean open = classes.get(item);
+
+                     if (open == null || open.booleanValue()) {
+                        classes.put(item, true);
+                     }
+                  }
+               }
+            }
+         } finally {
+            try {
+               in.close();
+            } catch (IOException e) {
+               // ignore it
+            }
+         }
       }
    }
 

@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.unidal.agent.AgentMain;
 import org.unidal.agent.cat.CatEnabled;
 import org.unidal.agent.cat.CatEvent;
 import org.unidal.agent.cat.CatTransaction;
@@ -29,6 +29,10 @@ import org.unidal.agent.cat.model.transform.BaseVisitor;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
 
 public class CatModelBuilder {
+   private static String CONFIGURE_XML = "META-INF/cat.xml";
+
+   private static String CONFIGURE_PROPERTIES = "META-INF/cat.properties";
+
    private Map<String, Boolean> m_classNames = new LinkedHashMap<String, Boolean>();
 
    private Map<String, ClassModel> m_classModels = new LinkedHashMap<String, ClassModel>();
@@ -200,7 +204,7 @@ public class CatModelBuilder {
 
    private class CatModelLoader {
       public void build(RootModel root) {
-         // step 1: collect configure from META-INF/cat.xml in the class paths
+         // step 1: collect configure from the class paths
          List<URL> urls = getConfigurations();
 
          for (URL url : urls) {
@@ -218,16 +222,34 @@ public class CatModelBuilder {
          List<URL> urls = new ArrayList<URL>();
 
          try {
-            ClassLoader loader = getClass().getClassLoader();
+            ClassLoader loader = AgentMain.class.getClassLoader();
 
             if (loader != null) {
-               Enumeration<URL> r2 = loader.getResources("META-INF/cat.xml");
+               List<URL> list = Collections.list(loader.getResources(CONFIGURE_XML));
+               int index = 1;
 
-               urls.addAll(Collections.list(r2));
-            } else {
-               Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.xml");
+               AgentMain.debug("Agent class loader: " + loader);
+               AgentMain.debug("Found %s %s files in the %s", list.size(), CONFIGURE_XML, loader);
 
-               urls.addAll(Collections.list(r1));
+               for (URL url : list) {
+                  AgentMain.debug("%3s: %s", index++, url);
+               }
+
+               urls.addAll(list);
+            }
+
+            // scan bootstrap and system class loader
+            {
+               List<URL> list = Collections.list(ClassLoader.getSystemResources(CONFIGURE_XML));
+               int index = 1;
+
+               AgentMain.debug("Found %s %s files in the system class loader", list.size(), CONFIGURE_XML);
+
+               for (URL url : list) {
+                  AgentMain.debug("%3s: %s", index++, url);
+               }
+
+               urls.addAll(list);
             }
          } catch (Throwable e) {
             // ignore it
@@ -240,7 +262,7 @@ public class CatModelBuilder {
 
    private class CatPropertiesLoader {
       public void build(RootModel root) {
-         // step 1: collect cat classes from META-INF/cat.properties in the class paths
+         // step 1: collect cat classes from the class paths
          List<URL> urls = getConfigurations();
 
          for (URL url : urls) {
@@ -278,16 +300,34 @@ public class CatModelBuilder {
          List<URL> urls = new ArrayList<URL>();
 
          try {
-            ClassLoader loader = getClass().getClassLoader();
+            ClassLoader loader = AgentMain.class.getClassLoader();
 
             if (loader != null) {
-               Enumeration<URL> r2 = loader.getResources("META-INF/cat.properties");
+               List<URL> list = Collections.list(loader.getResources(CONFIGURE_PROPERTIES));
+               int index = 1;
 
-               urls.addAll(Collections.list(r2));
-            } else {
-               Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/cat.properties");
+               AgentMain.debug("Agent class loader: " + loader);
+               AgentMain.debug("Found %s %s files in the %s", list.size(), CONFIGURE_PROPERTIES, loader);
 
-               urls.addAll(Collections.list(r1));
+               for (URL url : list) {
+                  AgentMain.debug("%3s: %s", index++, url);
+               }
+
+               urls.addAll(list);
+            }
+
+            // scan bootstrap and system class loader
+            {
+               List<URL> list = Collections.list(ClassLoader.getSystemResources(CONFIGURE_PROPERTIES));
+               int index = 1;
+
+               AgentMain.debug("Found %s %s files in the system class loader", list.size(), CONFIGURE_PROPERTIES);
+
+               for (URL url : list) {
+                  AgentMain.debug("%3s: %s", index++, url);
+               }
+
+               urls.addAll(list);
             }
          } catch (Throwable e) {
             // ignore it

@@ -1,6 +1,7 @@
 package org.unidal.agent;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Field;
 import java.util.jar.JarFile;
 
 /**
@@ -36,12 +37,11 @@ public class AgentMain {
    }
 
    public static boolean isDebug() {
-      return "true".equals(System.getProperty("AGENT_DEBUG"));
+      return "true".equals(System.getProperty("AGENT_DEBUG")) || "".equals(System.getProperty("AGENT_DEBUG"));
    }
 
    private static synchronized void main(String agentArgs, Instrumentation instrumentation) {
       if (s_instrumentation == null) {
-
          try {
             String agentJarPath = System.getProperty("agent.jar.path");
 

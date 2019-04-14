@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<class name="org.unidal.agent.cat.sample.greeting.Hello">
+<class name="org.unidal.agent.cat.sample.Hello">
    <method name="&lt;init&gt;" desc="()V">
-      <transaction type="Greeting" name="${method}">
+      <transaction type="Hello" name="${method}">
       </transaction>
    </method>
    <method name="bye" desc="(Ljava/lang/String;)Ljava/lang/String;">

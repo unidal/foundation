@@ -21,10 +21,14 @@ public class ClassWeaverManager {
    }
 
    public ClassWeaver findByClass(String className) {
-      for (ClassWeaver weaver : m_weavers.values()) {
-         if (weaver.isEligible(className)) {
-            return weaver;
+      try {
+         for (ClassWeaver weaver : m_weavers.values()) {
+            if (weaver.isEligible(className)) {
+               return weaver;
+            }
          }
+      } catch (Throwable e) {
+         e.printStackTrace();
       }
 
       return null;

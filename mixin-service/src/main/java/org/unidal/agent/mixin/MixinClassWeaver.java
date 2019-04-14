@@ -31,11 +31,17 @@ public class MixinClassWeaver implements ClassWeaver {
    @Override
    public JarFile initialize() {
       MixinModel source = m_builder.build();
-      MixinModel aggregated = new MixinModelAggregator().aggregate(source);
-      JarFile jarFile = new MixinJarFileBuilder(aggregated).build();
 
-      m_mixin = aggregated;
-      return jarFile;
+      if (!source.getClasses().isEmpty()) {
+         MixinModel aggregated = new MixinModelAggregator().aggregate(source);
+         JarFile jarFile = new MixinJarFileBuilder(aggregated).build();
+
+         m_mixin = aggregated;
+         return jarFile;
+      } else {
+         m_mixin = new MixinModel();
+         return null;
+      }
    }
 
    @Override

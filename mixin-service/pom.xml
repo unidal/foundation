@@ -44,9 +44,6 @@
                      <Can-Redefine-Classes>true</Can-Redefine-Classes>
                      <Can-Retransform-Classes>true</Can-Retransform-Classes>
                   </manifestEntries>
-                  <manifest>
-                     <addClasspath>true</addClasspath>
-                  </manifest>
                </archive>
             </configuration>
          </plugin>

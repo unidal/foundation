@@ -1,7 +1,6 @@
 package org.unidal.agent;
 
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Field;
 import java.util.jar.JarFile;
 
 /**

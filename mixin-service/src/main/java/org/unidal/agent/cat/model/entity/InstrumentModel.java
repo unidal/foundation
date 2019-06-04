@@ -7,26 +7,26 @@ import java.util.Map;
 import org.unidal.agent.cat.model.BaseEntity;
 import org.unidal.agent.cat.model.IVisitor;
 
-public class RootModel extends BaseEntity<RootModel> {
+public class InstrumentModel extends BaseEntity<InstrumentModel> {
    private Map<String, ClassModel> m_classes = new LinkedHashMap<String, ClassModel>();
 
-   public RootModel() {
+   public InstrumentModel() {
    }
 
    @Override
    public void accept(IVisitor visitor) {
-      visitor.visitRoot(this);
+      visitor.visitInstrument(this);
    }
 
-   public RootModel addClass(ClassModel _class) {
+   public InstrumentModel addClass(ClassModel _class) {
       m_classes.put(_class.getName(), _class);
       return this;
    }
 
    @Override
    public boolean equals(Object obj) {
-      if (obj instanceof RootModel) {
-         RootModel _o = (RootModel) obj;
+      if (obj instanceof InstrumentModel) {
+         InstrumentModel _o = (InstrumentModel) obj;
 
          if (!equals(getClasses(), _o.getClasses())) {
             return false;
@@ -74,7 +74,7 @@ public class RootModel extends BaseEntity<RootModel> {
    }
 
    @Override
-   public void mergeAttributes(RootModel other) {
+   public void mergeAttributes(InstrumentModel other) {
    }
 
    public ClassModel removeClass(String name) {

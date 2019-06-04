@@ -11,8 +11,8 @@ import org.xml.sax.Attributes;
 
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public class DefaultSaxMaker implements IMaker<Attributes> {
@@ -53,6 +53,13 @@ public class DefaultSaxMaker implements IMaker<Attributes> {
    }
 
    @Override
+   public InstrumentModel buildInstrument(Attributes attributes) {
+      InstrumentModel instrument = new InstrumentModel();
+
+      return instrument;
+   }
+
+   @Override
    public String buildKey(Attributes attributes) {
       throw new UnsupportedOperationException();
    }
@@ -64,13 +71,6 @@ public class DefaultSaxMaker implements IMaker<Attributes> {
       MethodModel method = new MethodModel(name, desc);
 
       return method;
-   }
-
-   @Override
-   public RootModel buildRoot(Attributes attributes) {
-      RootModel root = new RootModel();
-
-      return root;
    }
 
    @Override

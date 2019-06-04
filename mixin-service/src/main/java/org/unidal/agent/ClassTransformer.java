@@ -50,7 +50,7 @@ public class ClassTransformer implements ClassFileTransformer {
          ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
       initialize();
 
-      String className = binaryClassName.replace('/', '.');
+      String className = binaryClassName.replace('/', '.') + ".class";
       ClassWeaver weaver = m_manager.findByClass(className);
 
       if (weaver != null) {

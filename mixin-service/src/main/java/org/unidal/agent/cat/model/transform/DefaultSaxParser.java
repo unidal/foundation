@@ -10,8 +10,8 @@ import static org.unidal.agent.cat.model.Constants.ELEMENT_VALUES;
 
 import static org.unidal.agent.cat.model.Constants.ENTITY_CLASS;
 import static org.unidal.agent.cat.model.Constants.ENTITY_EVENT;
+import static org.unidal.agent.cat.model.Constants.ENTITY_INSTRUMENT;
 import static org.unidal.agent.cat.model.Constants.ENTITY_METHOD;
-import static org.unidal.agent.cat.model.Constants.ENTITY_ROOT;
 import static org.unidal.agent.cat.model.Constants.ENTITY_TRANSACTION;
 
 import java.io.BufferedInputStream;
@@ -33,8 +33,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.unidal.agent.cat.model.IEntity;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public class DefaultSaxParser extends DefaultHandler {
@@ -51,16 +51,16 @@ public class DefaultSaxParser extends DefaultHandler {
 
    private StringBuilder m_text = new StringBuilder();
 
-   public static RootModel parse(InputStream in) throws SAXException, IOException {
-      return parseEntity(RootModel.class, in);
+   public static InstrumentModel parse(InputStream in) throws SAXException, IOException {
+      return parseEntity(InstrumentModel.class, in);
    }
 
-   public static RootModel parse(Reader reader) throws SAXException, IOException {
-      return parseEntity(RootModel.class, reader);
+   public static InstrumentModel parse(Reader reader) throws SAXException, IOException {
+      return parseEntity(InstrumentModel.class, reader);
    }
 
-   public static RootModel parse(String xml) throws SAXException, IOException {
-      return parseEntity(RootModel.class, xml);
+   public static InstrumentModel parse(String xml) throws SAXException, IOException {
+      return parseEntity(InstrumentModel.class, xml);
    }
 
    @SuppressWarnings("unchecked")
@@ -223,6 +223,19 @@ public class DefaultSaxParser extends DefaultHandler {
       m_tags.push(qName);
    }
 
+   private void parseForInstrument(InstrumentModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
+      if (ENTITY_CLASS.equals(qName)) {
+         ClassModel class_ = m_maker.buildClass(attributes);
+
+         m_linker.onClass(parentObj, class_);
+         m_objs.push(class_);
+      } else {
+         throw new SAXException(String.format("Element(%s) is not expected under instrument!", qName));
+      }
+
+      m_tags.push(qName);
+   }
+
    private void parseForMethod(MethodModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
       if (ENTITY_TRANSACTION.equals(qName)) {
          TransactionModel transaction = m_maker.buildTransaction(attributes);
@@ -241,19 +254,6 @@ public class DefaultSaxParser extends DefaultHandler {
       m_tags.push(qName);
    }
 
-   private void parseForRoot(RootModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
-      if (ENTITY_CLASS.equals(qName)) {
-         ClassModel class_ = m_maker.buildClass(attributes);
-
-         m_linker.onClass(parentObj, class_);
-         m_objs.push(class_);
-      } else {
-         throw new SAXException(String.format("Element(%s) is not expected under root!", qName));
-      }
-
-      m_tags.push(qName);
-   }
-
    private void parseForTransaction(TransactionModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
       if (ELEMENT_KEYS.equals(qName) || ELEMENT_KEY.equals(qName) || ELEMENT_VALUES.equals(qName) || ELEMENT_VALUE.equals(qName) || ELEMENT_SUCCESSES.equals(qName) || ELEMENT_SUCCESS.equals(qName)) {
          m_objs.push(parentObj);
@@ -265,11 +265,11 @@ public class DefaultSaxParser extends DefaultHandler {
    }
 
    private void parseRoot(String qName, Attributes attributes) throws SAXException {
-      if (ENTITY_ROOT.equals(qName)) {
-         RootModel root = m_maker.buildRoot(attributes);
+      if (ENTITY_INSTRUMENT.equals(qName)) {
+         InstrumentModel instrument = m_maker.buildInstrument(attributes);
 
-         m_entity = root;
-         m_objs.push(root);
+         m_entity = instrument;
+         m_objs.push(instrument);
          m_tags.push(qName);
       } else if (ENTITY_CLASS.equals(qName)) {
          ClassModel _class = m_maker.buildClass(attributes);
@@ -309,8 +309,8 @@ public class DefaultSaxParser extends DefaultHandler {
             Object parent = m_objs.peek();
             String tag = m_tags.peek();
 
-            if (parent instanceof RootModel) {
-               parseForRoot((RootModel) parent, tag, qName, attributes);
+            if (parent instanceof InstrumentModel) {
+               parseForInstrument((InstrumentModel) parent, tag, qName, attributes);
             } else if (parent instanceof ClassModel) {
                parseForClass((ClassModel) parent, tag, qName, attributes);
             } else if (parent instanceof MethodModel) {

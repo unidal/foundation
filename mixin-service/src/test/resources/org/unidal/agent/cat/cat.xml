@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<root>
+<instrument>
    <class name="org.unidal.agent.cat.sample.hello.HelloService" origin-name="org.unidal.agent.cat.sample.hello.HelloService" enabled="true">
       <method name="hello" desc="(Ljava/lang/String;)Ljava/lang/String;">
          <transaction type="Service" name="hello">
@@ -24,4 +24,4 @@
    </class>
    <class>
    </class>
-</root>
+</instrument>

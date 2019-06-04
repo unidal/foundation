@@ -3,13 +3,13 @@ package org.unidal.agent.cat.model.transform;
 
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public interface ILinker {
 
-   public boolean onClass(RootModel parent, ClassModel _class);
+   public boolean onClass(InstrumentModel parent, ClassModel _class);
 
    public boolean onEvent(MethodModel parent, EventModel event);
 

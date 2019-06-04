@@ -13,12 +13,16 @@ public class AgentMain {
       main(agentArgs, instrumentation);
    }
 
+   public static void attachToSunJdk() throws Exception {
+      new SunJdkAttacher().loadAgent(AgentMain.class);
+   }
+
    public static void debug(String pattern, Object... args) {
       if (isDebug()) {
          if (args.length == 0) {
-            System.out.println(pattern);
+            System.out.println("[DEBUG] " + pattern);
          } else {
-            System.out.println(String.format(pattern, args));
+            System.out.println("[DEBUG] " + String.format(pattern, args));
          }
       }
    }
@@ -29,9 +33,9 @@ public class AgentMain {
 
    public static void info(String pattern, Object... args) {
       if (args.length == 0) {
-         System.out.println(pattern);
+         System.out.println("[INFO] " + pattern);
       } else {
-         System.out.println(String.format(pattern, args));
+         System.out.println("[INFO] " + String.format(pattern, args));
       }
    }
 
@@ -40,6 +44,8 @@ public class AgentMain {
    }
 
    private static synchronized void main(String agentArgs, Instrumentation instrumentation) {
+      info("Agent args: %s", agentArgs);
+
       if (s_instrumentation == null) {
          try {
             String agentJarPath = System.getProperty("agent.jar.path");
@@ -53,10 +59,10 @@ public class AgentMain {
                   e.printStackTrace();
                }
             } else {
-               String file = AgentMain.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-
-               instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(file));
-               debug("Appended agent jar(%s) to bootstrap class path.", file);
+               // String file = AgentMain.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+               //
+               // instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(file));
+               // debug("Appended agent jar(%s) to bootstrap class path.", file);
             }
 
             ClassTransformer transformer = new ClassTransformer(instrumentation);

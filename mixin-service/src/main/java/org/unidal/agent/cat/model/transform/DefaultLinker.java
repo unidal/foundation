@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public class DefaultLinker implements ILinker {
@@ -26,7 +26,7 @@ public class DefaultLinker implements ILinker {
    }
 
    @Override
-   public boolean onClass(final RootModel parent, final ClassModel _class) {
+   public boolean onClass(final InstrumentModel parent, final ClassModel _class) {
       parent.addClass(_class);
       return true;
    }

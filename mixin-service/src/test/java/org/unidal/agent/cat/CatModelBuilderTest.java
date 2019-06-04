@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.agent.cat.asm.CatModelBuilder;
-import org.unidal.agent.cat.model.entity.RootModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
 import org.xml.sax.SAXException;
 
@@ -14,12 +14,12 @@ public class CatModelBuilderTest {
    @Test
    public void test() throws SAXException, IOException {
       InputStream in = getClass().getResourceAsStream("hello.xml");
-      RootModel expected = DefaultSaxParser.parse(in);
+      InstrumentModel expected = DefaultSaxParser.parse(in);
       CatModelBuilder builder = new CatModelBuilder();
 
       builder.register(HelloService.class.getName());
 
-      RootModel actual = new RootModel();
+      InstrumentModel actual = new InstrumentModel();
 
       builder.build(actual);
 

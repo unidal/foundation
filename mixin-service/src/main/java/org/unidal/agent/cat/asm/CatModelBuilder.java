@@ -22,8 +22,8 @@ import org.unidal.agent.cat.CatEvent;
 import org.unidal.agent.cat.CatTransaction;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 import org.unidal.agent.cat.model.transform.BaseVisitor;
 import org.unidal.agent.cat.model.transform.DefaultSaxParser;
@@ -43,7 +43,7 @@ public class CatModelBuilder {
       return clazz.getName().equals(type.getClassName());
    }
 
-   public void build(RootModel root) {
+   public void build(InstrumentModel root) {
       new CatPropertiesLoader().build(root);
       new CatModelLoader().build(root);
    }
@@ -203,19 +203,27 @@ public class CatModelBuilder {
    }
 
    private class CatModelLoader {
-      public void build(RootModel root) {
+      public void build(InstrumentModel root) {
          // step 1: collect configure from the class paths
          List<URL> urls = getConfigurations();
 
          for (URL url : urls) {
             try {
-               ClassModel model = DefaultSaxParser.parseEntity(ClassModel.class, url.openStream());
+               AgentMain.info("Loading instrument model from %s", url);
 
-               root.addClass(model);
+               InstrumentModel instrument = DefaultSaxParser.parseEntity(InstrumentModel.class, url.openStream());
+
+               for (Map.Entry<String, ClassModel> e : instrument.getClasses().entrySet()) {
+                  if (root.findClass(e.getKey()) == null) {
+                     root.addClass(e.getValue());
+                  }
+               }
             } catch (Throwable t) {
                t.printStackTrace();
             }
          }
+
+         AgentMain.debug("Instrument model: \r\n%s", root);
       }
 
       private List<URL> getConfigurations() {
@@ -229,13 +237,15 @@ public class CatModelBuilder {
                int index = 1;
 
                AgentMain.debug("Agent class loader: " + loader);
-               AgentMain.debug("Found %s %s files in the %s", list.size(), CONFIGURE_XML, loader);
+               AgentMain.debug("Found %s files of %s in the %s", list.size(), CONFIGURE_XML, loader);
 
                for (URL url : list) {
                   AgentMain.debug("%3s: %s", index++, url);
-               }
 
-               urls.addAll(list);
+                  if (!urls.contains(url)) {
+                     urls.add(url);
+                  }
+               }
             }
 
             // scan bootstrap and system class loader
@@ -243,13 +253,15 @@ public class CatModelBuilder {
                List<URL> list = Collections.list(ClassLoader.getSystemResources(CONFIGURE_XML));
                int index = 1;
 
-               AgentMain.debug("Found %s %s files in the system class loader", list.size(), CONFIGURE_XML);
+               AgentMain.debug("Found %s files of %s in the system class loader", list.size(), CONFIGURE_XML);
 
                for (URL url : list) {
                   AgentMain.debug("%3s: %s", index++, url);
-               }
 
-               urls.addAll(list);
+                  if (!urls.contains(url)) {
+                     urls.add(url);
+                  }
+               }
             }
          } catch (Throwable e) {
             // ignore it
@@ -261,7 +273,7 @@ public class CatModelBuilder {
    }
 
    private class CatPropertiesLoader {
-      public void build(RootModel root) {
+      public void build(InstrumentModel root) {
          // step 1: collect cat classes from the class paths
          List<URL> urls = getConfigurations();
 

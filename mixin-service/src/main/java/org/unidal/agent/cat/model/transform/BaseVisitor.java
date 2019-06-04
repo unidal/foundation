@@ -4,8 +4,8 @@ package org.unidal.agent.cat.model.transform;
 import org.unidal.agent.cat.model.IVisitor;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public abstract class BaseVisitor implements IVisitor {
@@ -21,6 +21,13 @@ public abstract class BaseVisitor implements IVisitor {
    }
 
    @Override
+   public void visitInstrument(InstrumentModel instrument) {
+      for (ClassModel class_ : instrument.getClasses().values()) {
+         visitClass(class_);
+      }
+   }
+
+   @Override
    public void visitMethod(MethodModel method) {
       if (method.getTransaction() != null) {
          visitTransaction(method.getTransaction());
@@ -28,13 +35,6 @@ public abstract class BaseVisitor implements IVisitor {
 
       if (method.getEvent() != null) {
          visitEvent(method.getEvent());
-      }
-   }
-
-   @Override
-   public void visitRoot(RootModel root) {
-      for (ClassModel class_ : root.getClasses().values()) {
-         visitClass(class_);
       }
    }
 

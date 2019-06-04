@@ -31,11 +31,11 @@ public class Constants {
 
    public static final String ENTITY_EVENT = "event";
 
+   public static final String ENTITY_INSTRUMENT = "instrument";
+
    public static final String ENTITY_METHOD = "method";
 
    public static final String ENTITY_METHODS = "methods";
-
-   public static final String ENTITY_ROOT = "root";
 
    public static final String ENTITY_TRANSACTION = "transaction";
 }

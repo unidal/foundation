@@ -3,8 +3,8 @@ package org.unidal.agent.cat.model;
 
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public interface IVisitor {
@@ -13,9 +13,9 @@ public interface IVisitor {
 
    public void visitEvent(EventModel event);
 
-   public void visitMethod(MethodModel method);
+   public void visitInstrument(InstrumentModel instrument);
 
-   public void visitRoot(RootModel root);
+   public void visitMethod(MethodModel method);
 
    public void visitTransaction(TransactionModel transaction);
 }

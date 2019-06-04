@@ -3,8 +3,8 @@ package org.unidal.agent.cat.model.transform;
 
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public interface IMaker<T> {
@@ -13,11 +13,11 @@ public interface IMaker<T> {
 
    public EventModel buildEvent(T node);
 
+   public InstrumentModel buildInstrument(T node);
+
    public String buildKey(T node);
 
    public MethodModel buildMethod(T node);
-
-   public RootModel buildRoot(T node);
 
    public Integer buildSuccess(T node);
 

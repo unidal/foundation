@@ -11,8 +11,8 @@ import static org.unidal.agent.cat.model.Constants.ELEMENT_SUCCESS;
 import static org.unidal.agent.cat.model.Constants.ELEMENT_VALUE;
 import static org.unidal.agent.cat.model.Constants.ENTITY_CLASS;
 import static org.unidal.agent.cat.model.Constants.ENTITY_EVENT;
+import static org.unidal.agent.cat.model.Constants.ENTITY_INSTRUMENT;
 import static org.unidal.agent.cat.model.Constants.ENTITY_METHOD;
-import static org.unidal.agent.cat.model.Constants.ENTITY_ROOT;
 import static org.unidal.agent.cat.model.Constants.ENTITY_TRANSACTION;
 
 import java.lang.reflect.Array;
@@ -22,8 +22,8 @@ import org.unidal.agent.cat.model.IEntity;
 import org.unidal.agent.cat.model.IVisitor;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
-import org.unidal.agent.cat.model.entity.RootModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 
 public class DefaultXmlBuilder implements IVisitor {
@@ -308,6 +308,19 @@ public class DefaultXmlBuilder implements IVisitor {
    }
 
    @Override
+   public void visitInstrument(InstrumentModel instrument) {
+      startTag(ENTITY_INSTRUMENT, null);
+
+      if (!instrument.getClasses().isEmpty()) {
+         for (ClassModel class_ : instrument.getClasses().values()) {
+            class_.accept(m_visitor);
+         }
+      }
+
+      endTag(ENTITY_INSTRUMENT);
+   }
+
+   @Override
    public void visitMethod(MethodModel method) {
       startTag(ENTITY_METHOD, null, ATTR_NAME, method.getName(), ATTR_DESC, method.getDesc());
 
@@ -320,19 +333,6 @@ public class DefaultXmlBuilder implements IVisitor {
       }
 
       endTag(ENTITY_METHOD);
-   }
-
-   @Override
-   public void visitRoot(RootModel root) {
-      startTag(ENTITY_ROOT, null);
-
-      if (!root.getClasses().isEmpty()) {
-         for (ClassModel class_ : root.getClasses().values()) {
-            class_.accept(m_visitor);
-         }
-      }
-
-      endTag(ENTITY_ROOT);
    }
 
    @Override

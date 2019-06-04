@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -56,8 +57,7 @@ public class SunJdkAttacher {
    }
 
    private String getAgentJarPath(Class<?> agentClass) throws IOException, URISyntaxException {
-      CodeSource codeSource = agentClass.getProtectionDomain().getCodeSource();
-      String path = codeSource.getLocation().toURI().getPath();
+      String path = getAgentPath(agentClass);
       File file = new File(path);
 
       if (file.isFile()) { // jar file
@@ -73,7 +73,8 @@ public class SunJdkAttacher {
          try {
             addToJar(out, file, "");
          } catch (IOException e) {
-            e.printStackTrace();
+            AgentMain.info("[WARN] Get agent jar path failed! %s", e);
+
             throw e;
          } finally {
             out.close();
@@ -84,6 +85,26 @@ public class SunJdkAttacher {
          AgentMain.debug("Agent jar is %s", jarPath);
          return jarPath;
       }
+   }
+
+   private String getAgentPath(Class<?> agentClass) throws URISyntaxException {
+      CodeSource codeSource = agentClass.getProtectionDomain().getCodeSource();
+      URI uri = codeSource.getLocation().toURI();
+      String path = uri.getPath();
+
+      if (path == null || path.length() == 0) {
+         String str = uri.toString();
+         int pos1 = str.lastIndexOf(':');
+         int pos2 = str.indexOf(".jar", pos1 + 1);
+
+         if (pos1 > 0 && pos2 > pos1) {
+            path = str.substring(pos1 + 1, pos2 + 4);
+         } else {
+            AgentMain.info("Bad agent path: %s.", str);
+         }
+      }
+
+      return path;
    }
 
    private String getCurrentPid() {

@@ -8,12 +8,12 @@ import org.unidal.agent.ClassWeaver;
 import org.unidal.agent.cat.asm.CatClassGenerator;
 import org.unidal.agent.cat.asm.CatModelBuilder;
 import org.unidal.agent.cat.model.entity.ClassModel;
-import org.unidal.agent.cat.model.entity.RootModel;
+import org.unidal.agent.cat.model.entity.InstrumentModel;
 
 public class CatClassWeaver implements ClassWeaver {
    public static final String ID = "cat";
 
-   private RootModel m_model = new RootModel();
+   private InstrumentModel m_model = new InstrumentModel();
 
    private CatModelBuilder m_builder = new CatModelBuilder();
 

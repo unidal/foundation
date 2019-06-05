@@ -4,7 +4,9 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -19,6 +21,8 @@ import org.junit.Before;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
 import org.unidal.agent.cat.CatClassWeaver;
+import org.unidal.agent.cat.CatResourceProvider;
+import org.unidal.agent.cat.asm.CatModelBuilder.ClassModelBuilder;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.cat.message.Message;
 import org.unidal.cat.message.MessageTree;
@@ -28,7 +32,7 @@ import org.unidal.lookup.ContainerLoader;
 public abstract class AbstractHelloTest {
    protected static Set<String> s_classNames = new LinkedHashSet<String>();
 
-   protected static Set<ClassModel> s_classModels = new LinkedHashSet<ClassModel>();
+   protected static List<ClassModel> s_classModels = new ArrayList<ClassModel>();
 
    protected static MyMessagePool s_pool = new MyMessagePool();
 
@@ -112,13 +116,28 @@ public abstract class AbstractHelloTest {
          ClassTransformer transformer = new ClassTransformer(instrumentation);
          CatClassWeaver weaver = (CatClassWeaver) transformer.getWeaver(CatClassWeaver.ID);
 
-         for (String className : s_classNames) {
-            weaver.getBuilder().register(className);
-         }
+         weaver.setResourceProvider(new CatResourceProvider() {
+            @Override
+            public Collection<ClassModel> getModels(String name) {
+               List<ClassModel> models = new ArrayList<ClassModel>();
 
-         for (ClassModel model : s_classModels) {
-            weaver.getBuilder().register(model);
-         }
+               models.addAll(s_classModels);
+               models.addAll(super.getModels(name));
+
+               try {
+                  for (String className : s_classNames) {
+                     ClassModel model = new ClassModel(className);
+
+                     new ClassModelBuilder(model).build();
+                     models.add(model);
+                  }
+               } catch (Throwable t) {
+                  t.printStackTrace();
+               }
+
+               return models;
+            }
+         });
 
          instrumentation.addTransformer(transformer, false);
          s_instrumentation = instrumentation;

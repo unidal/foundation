@@ -38,7 +38,5 @@ public class AllSmapleTests extends AbstractHelloTest {
       new HelloOverrideTest().test();
       new HelloReturnTypeTest().test();
       new HelloModelTest().test();
-
-      new SnoopTest().test();
    }
 }

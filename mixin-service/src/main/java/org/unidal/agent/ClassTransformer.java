@@ -32,16 +32,13 @@ public class ClassTransformer implements ClassFileTransformer {
    private synchronized void initialize() {
       if (!m_initialized.get()) {
          m_initialized.set(true);
-         initializeClasspath();
-      }
-   }
 
-   private void initializeClasspath() {
-      List<JarFile> jarFiles = m_manager.initialize();
+         List<JarFile> jarFiles = m_manager.initialize();
 
-      for (JarFile jarFile : jarFiles) {
-         AgentMain.debug("Appended generated jar(%s) to bootstrap class path.", jarFile.getName());
-         m_instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
+         for (JarFile jarFile : jarFiles) {
+            AgentMain.debug("Appended generated jar(%s) to bootstrap class path.", jarFile.getName());
+            m_instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
+         }
       }
    }
 
@@ -50,7 +47,7 @@ public class ClassTransformer implements ClassFileTransformer {
          ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
       initialize();
 
-      String className = binaryClassName.replace('/', '.') + ".class";
+      String className = binaryClassName.replace('/', '.');
       ClassWeaver weaver = m_manager.findByClass(className);
 
       if (weaver != null) {

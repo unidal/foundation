@@ -2,15 +2,11 @@ package org.unidal.agent.mixin.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -22,6 +18,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.unidal.agent.mixin.MixinMeta;
+import org.unidal.agent.mixin.MixinResourceProvider;
 import org.unidal.agent.mixin.model.entity.ClassModel;
 import org.unidal.agent.mixin.model.entity.FieldModel;
 import org.unidal.agent.mixin.model.entity.InnerClassModel;
@@ -31,20 +28,17 @@ import org.unidal.agent.mixin.model.entity.SourceModel;
 import org.unidal.agent.mixin.model.entity.TargetModel;
 
 public class MixinModelBuilder {
-   private Map<String, Boolean> m_classes = new LinkedHashMap<String, Boolean>();
+   private MixinResourceProvider m_provider;
+
+   public MixinModelBuilder(MixinResourceProvider provider) {
+      m_provider = provider;
+   }
 
    public MixinModel build() {
       MixinModel mixin = new MixinModel();
-      List<URL> urls = getConfigurations();
 
-      // step 1: collect mix-in classes from META-INF/mixin.properties in the class paths
-      for (URL url : urls) {
-         try {
-            loadMixinClasses(url, m_classes);
-         } catch (Throwable t) {
-            t.printStackTrace();
-         }
-      }
+      // step 1: get classes from resource provider, i.e. class loader
+      Map<String, Boolean> m_classes = m_provider.getClasses("META-INF/mixin.properties");
 
       // step 2: build source for all mix-in classes
       List<Entry<String, Boolean>> classes = new ArrayList<Map.Entry<String, Boolean>>(m_classes.entrySet());
@@ -84,105 +78,6 @@ public class MixinModelBuilder {
       classModel.addSource(sourceModel);
    }
 
-   private List<URL> getConfigurations() {
-      List<URL> urls = new ArrayList<URL>();
-
-      try {
-         ClassLoader loader = getClass().getClassLoader();
-
-         if (loader != null) {
-            Enumeration<URL> r2 = loader.getResources("META-INF/mixin.properties");
-
-            urls.addAll(Collections.list(r2));
-         } else {
-            Enumeration<URL> r1 = ClassLoader.getSystemResources("META-INF/mixin.properties");
-
-            urls.addAll(Collections.list(r1));
-         }
-      } catch (Throwable e) {
-         // ignore it
-         e.printStackTrace();
-      }
-
-      return urls;
-   }
-
-   private void loadMixinClasses(URL url, Map<String, Boolean> classes) throws IOException {
-      InputStream in = url.openStream();
-
-      try {
-         Properties properties = new Properties();
-
-         properties.load(in);
-
-         for (String name : properties.stringPropertyNames()) {
-            List<String> items = split(name);
-
-            for (String item : items) {
-               if (item.startsWith("-")) {
-                  classes.put(item.substring(1), false);
-               } else {
-                  Boolean open = classes.get(item);
-
-                  if (open == null || open.booleanValue()) {
-                     classes.put(item, true);
-                  }
-               }
-            }
-         }
-      } finally {
-         try {
-            in.close();
-         } catch (IOException e) {
-            // ignore it
-         }
-      }
-   }
-
-   public void register(String mixinClass) {
-      try {
-         ClassReader reader = new ClassReader(mixinClass.replace('.', '/'));
-         MixinMetaRecognizer recognizer = new MixinMetaRecognizer();
-
-         reader.accept(recognizer, ClassReader.SKIP_FRAMES + ClassReader.SKIP_CODE + ClassReader.SKIP_DEBUG);
-
-         if (recognizer.isFound()) {
-            m_classes.put(mixinClass, true);
-         }
-      } catch (Exception e) {
-         // ignore it
-         e.printStackTrace();
-      }
-   }
-
-   private List<String> split(String str) {
-      List<String> list = new ArrayList<String>();
-      char delimiter = ',';
-      int len = str.length();
-      StringBuilder sb = new StringBuilder(len);
-
-      for (int i = 0; i < len + 1; i++) {
-         char ch = i == len ? delimiter : str.charAt(i);
-
-         if (ch == delimiter) {
-            String item = sb.toString();
-
-            sb.setLength(0);
-            item = item.trim();
-
-            if (item.length() == 0) {
-               continue;
-            }
-
-            list.add(item);
-         } else {
-            sb.append(ch);
-         }
-      }
-
-      return list;
-   }
-
    private static class InnerClassBuilder extends ClassVisitor {
       private SourceModel m_sourceModel;
 
@@ -220,29 +115,6 @@ public class MixinModelBuilder {
                new InnerClassBuilder(m_sourceModel, name).build();
             }
          }
-      }
-   }
-
-   private static class MixinMetaRecognizer extends ClassVisitor {
-      private boolean m_found;
-
-      public MixinMetaRecognizer() {
-         super(Opcodes.ASM5);
-      }
-
-      public boolean isFound() {
-         return m_found;
-      }
-
-      @Override
-      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-         Type type = Type.getType(desc);
-
-         if (MixinMeta.class.getName().equals(type.getClassName())) {
-            m_found = true;
-         }
-
-         return null;
       }
    }
 

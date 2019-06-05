@@ -15,7 +15,7 @@ public class CatClassWeaver implements ClassWeaver {
 
    private InstrumentModel m_model = new InstrumentModel();
 
-   private CatModelBuilder m_builder = new CatModelBuilder();
+   private CatResourceProvider m_provider = new CatResourceProvider();
 
    @Override
    public String getId() {
@@ -24,19 +24,25 @@ public class CatClassWeaver implements ClassWeaver {
 
    @Override
    public JarFile initialize() {
-      m_builder.build(m_model);
-      return null;
+      CatModelBuilder builder = new CatModelBuilder(m_provider);
+
+      builder.build(m_model);
+      return null; // no jar file
    }
 
    @Override
    public boolean isEligible(String className) {
       ClassModel model = m_model.findClass(className);
 
+      if (model == null) {
+         model = m_model.findClass(className + ".class");
+      }
+
       return model != null;
    }
 
-   public CatModelBuilder getBuilder() {
-      return m_builder;
+   public void setResourceProvider(CatResourceProvider provider) {
+      m_provider = provider;
    }
 
    @Override

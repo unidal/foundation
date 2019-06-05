@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.objectweb.asm.util.ASMifier;
 import org.unidal.agent.AgentMain;
 import org.unidal.agent.SunJdkAttacher;
+import org.unidal.agent.mixin.MixinResourceProvider;
 import org.unidal.agent.mixin.asm.MixinModelAggregator;
 import org.unidal.agent.mixin.asm.MixinModelBuilder;
 import org.unidal.agent.mixin.model.entity.ClassModel;
@@ -40,7 +41,7 @@ public class HttpHandlerTest {
       InputStream in = getClass().getResourceAsStream("protocol/plain.xml");
       String xml = Files.forIO().readUtf8String(in);
       MixinModel expected = DefaultSaxParser.parse(xml);
-      MixinModel mixin = new MixinModelBuilder().build();
+      MixinModel mixin = new MixinModelBuilder(new MixinResourceProvider()).build();
       ClassModel actual = mixin.findClass("sun.net.www.protocol.http.Handler");
 
       if (actual == null) {

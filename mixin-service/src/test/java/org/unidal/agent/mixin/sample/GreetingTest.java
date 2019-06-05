@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import org.unidal.agent.ClassTransformer;
 import org.unidal.agent.SunJdkAttacher;
 import org.unidal.agent.mixin.MixinClassWeaver;
+import org.unidal.agent.mixin.MixinResourceProvider;
 import org.unidal.agent.mixin.sample.greeting.Greeting;
 
 public class GreetingTest {
@@ -69,9 +71,18 @@ public class GreetingTest {
          ClassTransformer transformer = new ClassTransformer(inst);
          MixinClassWeaver weaver = (MixinClassWeaver) transformer.getWeaver(MixinClassWeaver.ID);
 
-         for (String mixin : s_mixins) {
-            weaver.getBuilder().register(mixin);
-         }
+         weaver.setResourceProvider(new MixinResourceProvider() {
+            @Override
+            public Map<String, Boolean> getClasses(String name) {
+               Map<String, Boolean> classes = super.getClasses(name);
+
+               for (String mixin : s_mixins) {
+                  classes.put(mixin, true);
+               }
+
+               return classes;
+            }
+         });
 
          inst.addTransformer(transformer, false);
       }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +19,7 @@ import org.objectweb.asm.Type;
 import org.unidal.agent.AgentMain;
 import org.unidal.agent.cat.CatEnabled;
 import org.unidal.agent.cat.CatEvent;
+import org.unidal.agent.cat.CatResourceProvider;
 import org.unidal.agent.cat.CatTransaction;
 import org.unidal.agent.cat.model.entity.ClassModel;
 import org.unidal.agent.cat.model.entity.EventModel;
@@ -26,7 +27,6 @@ import org.unidal.agent.cat.model.entity.InstrumentModel;
 import org.unidal.agent.cat.model.entity.MethodModel;
 import org.unidal.agent.cat.model.entity.TransactionModel;
 import org.unidal.agent.cat.model.transform.BaseVisitor;
-import org.unidal.agent.cat.model.transform.DefaultSaxParser;
 
 public class CatModelBuilder {
    private static String CONFIGURE_XML = "META-INF/cat.xml";
@@ -37,6 +37,12 @@ public class CatModelBuilder {
 
    private Map<String, ClassModel> m_classModels = new LinkedHashMap<String, ClassModel>();
 
+   private CatResourceProvider m_provider;
+
+   public CatModelBuilder(CatResourceProvider provider) {
+      m_provider = provider;
+   }
+
    private static boolean isAnnotation(String desc, Class<?> clazz) {
       Type type = Type.getType(desc);
 
@@ -46,26 +52,6 @@ public class CatModelBuilder {
    public void build(InstrumentModel root) {
       new CatPropertiesLoader().build(root);
       new CatModelLoader().build(root);
-   }
-
-   public void register(ClassModel classModel) {
-      m_classModels.put(classModel.getName(), classModel);
-   }
-
-   public void register(String className) {
-      try {
-         ClassReader reader = new ClassReader(className.replace('.', '/'));
-         CatMetaRecognizer recognizer = new CatMetaRecognizer();
-
-         reader.accept(recognizer, ClassReader.SKIP_FRAMES + ClassReader.SKIP_CODE + ClassReader.SKIP_DEBUG);
-
-         if (recognizer.isFound()) {
-            m_classNames.put(className, true);
-         }
-      } catch (Exception e) {
-         // ignore it
-         new RuntimeException(String.format("Unable to register class(%s)!", className), e).printStackTrace();
-      }
    }
 
    private List<String> split(String str) {
@@ -170,112 +156,24 @@ public class CatModelBuilder {
       }
    }
 
-   private static class CatMetaRecognizer extends ClassVisitor {
-      private boolean m_found;
-
-      public CatMetaRecognizer() {
-         super(Opcodes.ASM5);
-      }
-
-      public boolean isFound() {
-         return m_found;
-      }
-
-      @Override
-      public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-         Type type = Type.getType(desc);
-
-         if (CatEnabled.class.getName().equals(type.getClassName())) {
-            m_found = true;
-
-            return new AnnotationVisitor(Opcodes.ASM5) {
-               @Override
-               public void visit(String name, Object value) {
-                  if (name.equals("value") && Boolean.FALSE.equals(value)) {
-                     m_found = false;
-                  }
-               }
-            };
-         }
-
-         return null;
-      }
-   }
-
    private class CatModelLoader {
       public void build(InstrumentModel root) {
-         // step 1: collect configure from the class paths
-         List<URL> urls = getConfigurations();
+         Collection<ClassModel> models = m_provider.getModels(CONFIGURE_XML);
 
-         for (URL url : urls) {
-            try {
-               AgentMain.info("Loading instrument model from %s", url);
-
-               InstrumentModel instrument = DefaultSaxParser.parseEntity(InstrumentModel.class, url.openStream());
-
-               for (Map.Entry<String, ClassModel> e : instrument.getClasses().entrySet()) {
-                  if (root.findClass(e.getKey()) == null) {
-                     root.addClass(e.getValue());
-                  }
-               }
-            } catch (Throwable t) {
-               t.printStackTrace();
+         for (ClassModel model : models) {
+            if (root.findClass(model.getName()) == null) {
+               root.addClass(model);
             }
          }
 
          AgentMain.debug("Instrument model: \r\n%s", root);
-      }
-
-      private List<URL> getConfigurations() {
-         List<URL> urls = new ArrayList<URL>();
-
-         try {
-            ClassLoader loader = AgentMain.class.getClassLoader();
-
-            if (loader != null) {
-               List<URL> list = Collections.list(loader.getResources(CONFIGURE_XML));
-               int index = 1;
-
-               AgentMain.debug("Agent class loader: " + loader);
-               AgentMain.debug("Found %s files of %s in the %s", list.size(), CONFIGURE_XML, loader);
-
-               for (URL url : list) {
-                  AgentMain.debug("%3s: %s", index++, url);
-
-                  if (!urls.contains(url)) {
-                     urls.add(url);
-                  }
-               }
-            }
-
-            // scan bootstrap and system class loader
-            {
-               List<URL> list = Collections.list(ClassLoader.getSystemResources(CONFIGURE_XML));
-               int index = 1;
-
-               AgentMain.debug("Found %s files of %s in the system class loader", list.size(), CONFIGURE_XML);
-
-               for (URL url : list) {
-                  AgentMain.debug("%3s: %s", index++, url);
-
-                  if (!urls.contains(url)) {
-                     urls.add(url);
-                  }
-               }
-            }
-         } catch (Throwable e) {
-            // ignore it
-            e.printStackTrace();
-         }
-
-         return urls;
       }
    }
 
    private class CatPropertiesLoader {
       public void build(InstrumentModel root) {
          // step 1: collect cat classes from the class paths
-         List<URL> urls = getConfigurations();
+         List<URL> urls = m_provider.getResources(CONFIGURE_PROPERTIES);
 
          for (URL url : urls) {
             try {
@@ -306,47 +204,6 @@ public class CatModelBuilder {
 
          // step 4: remove unrelated method
          root.accept(new MethodRemovalVisitor());
-      }
-
-      private List<URL> getConfigurations() {
-         List<URL> urls = new ArrayList<URL>();
-
-         try {
-            ClassLoader loader = AgentMain.class.getClassLoader();
-
-            if (loader != null) {
-               List<URL> list = Collections.list(loader.getResources(CONFIGURE_PROPERTIES));
-               int index = 1;
-
-               AgentMain.debug("Agent class loader: " + loader);
-               AgentMain.debug("Found %s %s files in the %s", list.size(), CONFIGURE_PROPERTIES, loader);
-
-               for (URL url : list) {
-                  AgentMain.debug("%3s: %s", index++, url);
-               }
-
-               urls.addAll(list);
-            }
-
-            // scan bootstrap and system class loader
-            {
-               List<URL> list = Collections.list(ClassLoader.getSystemResources(CONFIGURE_PROPERTIES));
-               int index = 1;
-
-               AgentMain.debug("Found %s %s files in the system class loader", list.size(), CONFIGURE_PROPERTIES);
-
-               for (URL url : list) {
-                  AgentMain.debug("%3s: %s", index++, url);
-               }
-
-               urls.addAll(list);
-            }
-         } catch (Throwable e) {
-            // ignore it
-            e.printStackTrace();
-         }
-
-         return urls;
       }
 
       private void loadClassNames(URL url, Map<String, Boolean> classes) throws IOException {
@@ -434,7 +291,7 @@ public class CatModelBuilder {
       }
    }
 
-   private static class ClassModelBuilder extends ClassVisitor {
+   public static class ClassModelBuilder extends ClassVisitor {
       private ClassModel m_model;
 
       public ClassModelBuilder(ClassModel model) {
@@ -494,7 +351,7 @@ public class CatModelBuilder {
       }
    }
 
-   private static class MethodRemovalVisitor extends BaseVisitor {
+   public static class MethodRemovalVisitor extends BaseVisitor {
       @Override
       public void visitClass(ClassModel _class) {
          List<MethodModel> methods = _class.getMethods();

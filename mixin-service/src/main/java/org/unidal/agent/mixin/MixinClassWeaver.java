@@ -17,11 +17,7 @@ public class MixinClassWeaver implements ClassWeaver {
 
    private MixinModel m_mixin;
 
-   private MixinModelBuilder m_builder = new MixinModelBuilder();
-
-   public MixinModelBuilder getBuilder() {
-      return m_builder;
-   }
+   private MixinResourceProvider m_provider = new MixinResourceProvider();
 
    @Override
    public String getId() {
@@ -30,7 +26,8 @@ public class MixinClassWeaver implements ClassWeaver {
 
    @Override
    public JarFile initialize() {
-      MixinModel source = m_builder.build();
+      MixinModelBuilder builder = new MixinModelBuilder(m_provider);
+      MixinModel source = builder.build();
 
       if (!source.getClasses().isEmpty()) {
          MixinModel aggregated = new MixinModelAggregator().aggregate(source);
@@ -49,6 +46,10 @@ public class MixinClassWeaver implements ClassWeaver {
       ClassModel model = m_mixin.findClass(className);
 
       return model != null;
+   }
+
+   public void setResourceProvider(MixinResourceProvider provider) {
+      m_provider = provider;
    }
 
    @Override

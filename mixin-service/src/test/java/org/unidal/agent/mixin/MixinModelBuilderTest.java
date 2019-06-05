@@ -2,6 +2,7 @@ package org.unidal.agent.mixin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,10 +18,16 @@ public class MixinModelBuilderTest {
    public void test() throws SAXException, IOException {
       InputStream in = getClass().getResourceAsStream("greeting.xml");
       MixinModel expected = DefaultSaxParser.parse(in);
-      MixinModelBuilder builder = new MixinModelBuilder();
+      MixinModelBuilder builder = new MixinModelBuilder(new MixinResourceProvider() {
+         @Override
+         public Map<String, Boolean> getClasses(String name) {
+            Map<String, Boolean> classes = super.getClasses(name);
 
-      builder.register(GreetingMixin.class.getName());
-      builder.register(GreetingMixin2.class.getName());
+            classes.put(GreetingMixin.class.getName(), true);
+            classes.put(GreetingMixin2.class.getName(), true);
+            return classes;
+         }
+      });
 
       MixinModel actual = builder.build();
 

@@ -58,11 +58,6 @@ public class AgentMain {
                   // ignore it
                   e.printStackTrace();
                }
-            } else {
-               // String file = AgentMain.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-               //
-               // instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(file));
-               // debug("Appended agent jar(%s) to bootstrap class path.", file);
             }
 
             ClassTransformer transformer = new ClassTransformer(instrumentation);

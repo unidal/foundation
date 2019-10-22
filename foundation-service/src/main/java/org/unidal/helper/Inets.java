@@ -28,7 +28,7 @@ public enum Inets {
             for (NetworkInterface ni : nis) {
                print(ni);
 
-               if (ni.isUp()) {
+               if (ni.isUp() && !ni.isLoopback()) {
                   List<InetAddress> addresses = Collections.list(ni.getInetAddresses());
 
                   for (InetAddress address : addresses) {

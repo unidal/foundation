@@ -58,6 +58,8 @@ public class InetsTest {
    public static void main(String[] args) {
       System.setProperty("verbose", "true");
 
-      Inets.IP4.getLocalHostAddress();
+      String ip = Inets.IP4.getLocalHostAddress();
+
+      System.out.println("IP: " + ip);
    }
 }

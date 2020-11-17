@@ -24,6 +24,8 @@ public class Urls {
 
       private Map<String, String> m_headers = new HashMap<String, String>();
 
+      private byte[] m_body;
+
       private boolean m_gzip;
 
       public UrlIO connectTimeout(int connectTimeout) {
@@ -37,6 +39,11 @@ public class Urls {
 
       public UrlIO header(String name, String value) {
          m_headers.put(name, value);
+         return this;
+      }
+
+      public UrlIO body(byte[] body) {
+         m_body = body;
          return this;
       }
 
@@ -65,6 +72,15 @@ public class Urls {
                }
             }
          }
+
+         if (m_body != null) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Length", String.valueOf(m_body.length));
+
+            conn.getOutputStream().write(m_body);
+         }
+
+         conn.connect();
 
          Map<String, List<String>> headers = conn.getHeaderFields();
 

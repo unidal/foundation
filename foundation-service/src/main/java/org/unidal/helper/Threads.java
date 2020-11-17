@@ -251,7 +251,7 @@ public class Threads {
       }
 
       public void onThreadGroupCreated(ThreadGroup group, String name) {
-         for (ThreadListener listener : m_listeners) {
+         for (ThreadListener listener : new ArrayList<ThreadListener>(m_listeners)) {
             try {
                listener.onThreadGroupCreated(group, name);
             } catch (Exception e) {
@@ -261,7 +261,7 @@ public class Threads {
       }
 
       public void onThreadPoolCreated(ExecutorService service, String name) {
-         for (ThreadListener listener : m_listeners) {
+         for (ThreadListener listener : new ArrayList<ThreadListener>(m_listeners)) {
             try {
                listener.onThreadPoolCreated(service, name);
             } catch (Exception e) {
@@ -271,7 +271,7 @@ public class Threads {
       }
 
       public void onThreadStarting(Thread thread, String name) {
-         for (ThreadListener listener : m_listeners) {
+         for (ThreadListener listener : new ArrayList<ThreadListener>(m_listeners)) {
             try {
                listener.onThreadStarting(thread, name);
             } catch (Exception e) {
@@ -281,7 +281,7 @@ public class Threads {
       }
 
       public void onThreadStopped(Thread thread, String name) {
-         for (ThreadListener listener : m_listeners) {
+         for (ThreadListener listener : new ArrayList<ThreadListener>(m_listeners)) {
             try {
                listener.onThreadStopping(thread, name);
             } catch (Exception e) {

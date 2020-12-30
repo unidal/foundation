@@ -302,8 +302,10 @@ public class Objects {
                   sb.comma();
                }
 
-               sb.key(key).colon();
-               fromObject(done, sb, value);
+               if (value != null) {
+                  sb.key(key).colon();
+                  fromObject(done, sb, value);
+               }
             }
 
             sb.raw("}");

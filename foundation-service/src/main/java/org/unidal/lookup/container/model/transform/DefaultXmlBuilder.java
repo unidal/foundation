@@ -279,7 +279,9 @@ public class DefaultXmlBuilder implements IVisitor {
             }
          } else if (any.hasValue()) {
             if (any.getName() == null) {
-               m_sb.append(any.getValue());
+               if (any.getValue().trim().length() != 0) {
+                  m_sb.append(any.getValue());
+                }
             } else {
                tagWithText(any.getName(), any.getValue());
             }

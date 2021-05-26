@@ -138,8 +138,9 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
    public void mergeAttributes(ComponentModel other) {
    }
 
-   public void setDynamicElements(List<Any> dynamicElements) {
+   public ComponentModel setDynamicElements(List<Any> dynamicElements) {
       m_dynamicElements = dynamicElements;
+      return this;
    }
 
    public ComponentModel setConfiguration(ConfigurationModel configuration) {

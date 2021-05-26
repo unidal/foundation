@@ -49,8 +49,9 @@ public class ConfigurationModel extends BaseEntity<ConfigurationModel> {
    public void mergeAttributes(ConfigurationModel other) {
    }
 
-   public void setDynamicElements(List<Any> dynamicElements) {
+   public ConfigurationModel setDynamicElements(List<Any> dynamicElements) {
       m_dynamicElements = dynamicElements;
+      return this;
    }
 
 }

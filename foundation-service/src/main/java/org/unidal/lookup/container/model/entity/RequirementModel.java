@@ -82,8 +82,9 @@ public class RequirementModel extends BaseEntity<RequirementModel> {
    public void mergeAttributes(RequirementModel other) {
    }
 
-   public void setDynamicElements(List<Any> dynamicElements) {
+   public RequirementModel setDynamicElements(List<Any> dynamicElements) {
       m_dynamicElements = dynamicElements;
+      return this;
    }
 
    public RequirementModel setFieldName(String fieldName) {

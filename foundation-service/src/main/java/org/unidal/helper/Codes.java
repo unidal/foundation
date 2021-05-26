@@ -1,6 +1,7 @@
 package org.unidal.helper;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class Codes {
@@ -23,7 +24,9 @@ public class Codes {
             bb.put((byte) (high << 4 | low));
          }
 
-         byte[] data = (byte[]) bb.flip().array();
+         ((Buffer)bb).flip();
+         
+         byte[] data = (byte[]) bb.array();
 
          Bytes.forBits().mask(data, k);
          Bytes.forBits().swap(data, p, q);

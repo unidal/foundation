@@ -53,6 +53,29 @@ public class Any extends BaseEntity<Any> {
       return m_children;
    }
 
+   @Override
+   public boolean equals(Object obj) {
+      if (obj instanceof Any) {
+         Any _o = (Any) obj;
+
+         if (!equals(getName(), _o.getName())) {
+            return false;
+         }
+
+         if (!equals(getValue(), _o.getValue())) {
+            return false;
+         }
+
+         if (!equals(getAttributes(), _o.getAttributes())) {
+            return false;
+         }
+
+         return true;
+      }
+
+      return false;
+   }
+
    public List<Any> getAllChildren(String name) {
       List<Any> all = new ArrayList<Any>();
 
@@ -95,6 +118,17 @@ public class Any extends BaseEntity<Any> {
       return m_value;
    }
 
+   @Override
+   public int hashCode() {
+      int hash = 0;
+
+      hash = hash * 31 + (m_name == null ? 0 : m_name.hashCode());
+      hash = hash * 31 + (m_value == null ? 0 : m_value.hashCode());
+      hash = hash * 31 + getAttributes().hashCode();
+
+      return hash;
+   }
+
    public boolean hasValue() {
       return m_value != null;
    }
@@ -117,14 +151,5 @@ public class Any extends BaseEntity<Any> {
    public Any setValue(String value) {
       m_value = value;
       return this;
-   }
-
-   @Override
-   public String toString() {
-      if (m_value != null) {
-         return String.format("<%s>%s</%1$s>", m_name,m_value);
-      } else {
-         return super.toString();
-      }
    }
 }

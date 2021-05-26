@@ -24,6 +24,7 @@
    </dependencies>
    <build>
       <plugins>
+         <!-- 
          <plugin>
             <groupId>org.unidal.maven.plugins</groupId>
             <artifactId>codegen-maven-plugin</artifactId>
@@ -33,7 +34,6 @@
                   ${basedir}/src/main/resources/META-INF/dal/model/plexus-manifest.xml,
                ]]></manifest>
             </configuration>
-            <!-- regenerate the mode in the command line using command "mvn codegen:dal-model" -->
             <executions>
                <execution>
                   <id>generate dal model files</id>
@@ -55,8 +55,12 @@
             <configuration>
                <className>org.unidal.build.ComponentsConfigurator</className>
             </configuration>
-            <!-- regenerate the mode in the command line using command "mvn plexus:process-classes" -->
          </plugin>
+         -->
+         <!-- steps to regenerate the mode: -->
+         <!-- 1. uncomment above build section" -->
+         <!-- 2. run "mvn codegen:dal-model" in the command line -->
+         <!-- 3. run "mvn plexus:process-classes" in the command line -->
       </plugins>
    </build>
 </project>

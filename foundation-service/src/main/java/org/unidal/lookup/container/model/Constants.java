@@ -17,13 +17,13 @@ public class Constants {
 
    public static final String ENTITY_COMPONENT = "component";
 
-   public static final String ENTITY_COMPONENTS = "components";
-
    public static final String ENTITY_CONFIGURATION = "configuration";
 
    public static final String ENTITY_PLEXUS = "plexus";
 
    public static final String ENTITY_REQUIREMENT = "requirement";
+
+   public static final String ENTITY_COMPONENTS = "components";
 
    public static final String ENTITY_REQUIREMENTS = "requirements";
 }

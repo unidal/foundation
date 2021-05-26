@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<wizard package="org.unidal.agent.mixin">
-   <model package="org.unidal.agent.mixin.model" name="mixin">
-      <sample-model>src/test/resources/org/unidal/agent/mixin/mixin.xml</sample-model>
-   </model>
-   <model package="org.unidal.agent.cat.model" name="cat">
-      <sample-model>src/test/resources/org/unidal/agent/cat/cat.xml</sample-model>
-   </model>
-</wizard>

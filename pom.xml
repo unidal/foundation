@@ -11,13 +11,7 @@
 	<artifactId>parent</artifactId>
 	<version>5.0.3</version>
 	<packaging>pom</packaging>
-	<name>Foundation</name>
-	<description>Unidal Foundation</description>
-	<modules>
-		<module>foundation-service</module>
-		<module>mixin-service</module>
-		<module>mixin-sample</module>
-	</modules>
+	<name>Foundation Parent POM</name>
 	<url>https://github.com/unidal/foundation</url>
 	<scm>
 		<connection>scm:git:git://github.com/unidal/foundation.git</connection>
@@ -25,15 +19,12 @@
 		<url>https://github.com/unidal/foundation/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
+	<modules>
+		<module>foundation-service</module>
+	</modules>
 	<properties>
-		<asm.version>6.2.1</asm.version>
-      <cat.version>2.0.0</cat.version>
 		<junit.version>4.12</junit.version>
 		<log4j.version>1.2.17</log4j.version>
-
-		<!-- plugin version -->
-		<codegen.plugin.version>4.0.0</codegen.plugin.version>
-		<plexus.plugin.version>4.0.0</plexus.plugin.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -41,21 +32,6 @@
             <groupId>org.unidal.foundation</groupId>
             <artifactId>foundation-service</artifactId>
             <version>${project.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.unidal.foundation</groupId>
-            <artifactId>mixin-service</artifactId>
-            <version>${project.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-util</artifactId>
-            <version>${asm.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.unidal.cat</groupId>
-            <artifactId>cat</artifactId>
-            <version>${cat.version}</version>
          </dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -69,26 +45,5 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<build>
-		<pluginManagement>
-			<plugins>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-shade-plugin</artifactId>
-               <version>3.2.1</version>
-            </plugin>
-				<plugin>
-					<groupId>org.unidal.maven.plugins</groupId>
-					<artifactId>codegen-maven-plugin</artifactId>
-					<version>${codegen.plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.unidal.maven.plugins</groupId>
-					<artifactId>plexus-maven-plugin</artifactId>
-					<version>${plexus.plugin.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 </project>
 

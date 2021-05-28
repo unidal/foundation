@@ -4,19 +4,19 @@
 	<parent>
 		<groupId>org.unidal</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0.0</version>
+		<version>2.0.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.unidal.foundation</groupId>
 	<artifactId>parent</artifactId>
-	<version>5.0.3</version>
+	<version>6.0.0</version>
 	<packaging>pom</packaging>
 	<name>Foundation Parent POM</name>
-	<url>https://github.com/unidal/foundation</url>
+	<url>https://gitee.com/unidal/foundation</url>
 	<scm>
-		<connection>scm:git:git://github.com/unidal/foundation.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/unidal/foundation.git</developerConnection>
-		<url>https://github.com/unidal/foundation/tree/master</url>
+		<connection>scm:git:git://gitee.com/unidal/foundation.git</connection>
+		<developerConnection>scm:git:ssh://git@gitee.com/unidal/foundation.git</developerConnection>
+		<url>https://gitee.com/unidal/foundation/tree/master</url>
 		<tag>HEAD</tag>
 	</scm>
 	<modules>
@@ -29,7 +29,7 @@
 	<dependencyManagement>
 		<dependencies>
          <dependency>
-            <groupId>org.unidal.foundation</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>foundation-service</artifactId>
             <version>${project.version}</version>
          </dependency>

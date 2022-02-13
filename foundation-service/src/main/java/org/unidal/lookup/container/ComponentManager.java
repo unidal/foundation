@@ -29,7 +29,7 @@ public class ComponentManager {
 
    private LoggerManager m_loggerManager;
 
-   private ComponentFactory m_factory; // external component factory to extend plexus capability
+   private ComponentFactory m_factory; // external component factory to extend the container capability
 
    public ComponentManager(PlexusContainer container, InputStream in) throws Exception {
       m_container = container;

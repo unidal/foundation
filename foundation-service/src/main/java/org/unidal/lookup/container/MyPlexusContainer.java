@@ -20,8 +20,8 @@ public class MyPlexusContainer implements PlexusContainer {
 	}
 
 	public MyPlexusContainer(InputStream in) throws Exception {
-		m_manager = new ComponentManager(this, in);
 		m_context.put("plexus", this);
+		m_manager = new ComponentManager(this, in);
 	}
 
 	@Override

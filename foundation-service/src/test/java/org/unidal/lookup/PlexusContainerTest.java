@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
-@SuppressWarnings("unused")
 public class PlexusContainerTest extends ComponentTestCase {
    @Test
    public void testAmbiguousFields() throws Exception {

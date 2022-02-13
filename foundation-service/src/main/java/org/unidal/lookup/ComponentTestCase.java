@@ -136,15 +136,15 @@ public abstract class ComponentTestCase extends ContainerHolder {
 
          if (type == elementType) { // normal simple case
             if (roleHints.length == 0) {
-               component.req(role);
+               component.req(role, (String) null, field.getName());
             } else if (roleHints.length == 1) {
-               component.req(role, roleHints[0]);
+               component.req(role, roleHints[0], field.getName());
             } else {
                component.req(role, roleHints, field.getName());
             }
          } else { // List, Set or Array
             if (roleHints.length == 0) {
-               component.req(role, null, field.getName());
+               component.req(role, (String[]) null, field.getName());
             } else {
                component.req(role, roleHints, field.getName());
             }
@@ -203,9 +203,14 @@ public abstract class ComponentTestCase extends ContainerHolder {
       }
 
       public ComponentDefinition<T> req(Class<?> role, String roleHint) {
+         return req(role, (String) null, null);
+      }
+
+      public ComponentDefinition<T> req(Class<?> role, String roleHint, String fieldName) {
          RequirementModel requirement = new RequirementModel();
 
          requirement.setRole(role.getName());
+         requirement.setFieldName(fieldName);
 
          if (roleHint != null) {
             requirement.setRoleHint(roleHint);

@@ -34,6 +34,8 @@ public class ContainerHolderTest extends ComponentTestCase {
          define(MockEnum.class, value.name());
       }
 
+      define(MockMultipleRoleHints.class);
+
       define(BadObject.class);
       define(BadObjectHolder.class);
 
@@ -94,6 +96,14 @@ public class ContainerHolderTest extends ComponentTestCase {
    }
 
    @Test
+   public void testLookupCollection() throws Exception {
+      Assert.assertEquals(LinkedList.class, lookup(Queue.class, "non-blocking").getClass());
+      Assert.assertEquals(LinkedBlockingQueue.class, lookup(Queue.class, "blocking").getClass());
+      Assert.assertEquals(ArrayList.class, lookup(List.class, "array").getClass());
+      Assert.assertEquals(HashMap.class, lookup(Map.class, "hash").getClass());
+   }
+
+   @Test
    public void testLookupEnum() throws Exception {
       MockInterface o0 = lookup(MockInterface.class);
       MockEnum o1 = (MockEnum) lookup(MockInterface.class, MockEnum.FIELD1.name());
@@ -105,14 +115,6 @@ public class ContainerHolderTest extends ComponentTestCase {
       Assert.assertEquals(MockEnum.FIELD2.name(), o2.getRoleHint());
 
       Assert.assertSame(o0, MockEnum.FIELD2.getDefaultOne());
-   }
-
-   @Test
-   public void testLookupForCollection() throws Exception {
-      Assert.assertEquals(LinkedList.class, lookup(Queue.class, "non-blocking").getClass());
-      Assert.assertEquals(LinkedBlockingQueue.class, lookup(Queue.class, "blocking").getClass());
-      Assert.assertEquals(ArrayList.class, lookup(List.class, "array").getClass());
-      Assert.assertEquals(HashMap.class, lookup(Map.class, "hash").getClass());
    }
 
    @Test
@@ -147,7 +149,16 @@ public class ContainerHolderTest extends ComponentTestCase {
    }
 
    @Test
-   public void testRoleHintComponent() throws ComponentLookupException {
+   public void testMultipleRoleHints() throws ComponentLookupException {
+      MockMultipleRoleHints object = getContainer().lookup(MockMultipleRoleHints.class);
+
+      Assert.assertEquals(MockObject.class, object.m_default.getClass());
+      Assert.assertEquals(MockObject2.class, object.m_secondary.getClass());
+      Assert.assertEquals(MockObject3.class, object.m_third.getClass());
+   }
+
+   @Test
+   public void testRoleHintEnabled() throws ComponentLookupException {
       List<MockRoleHintObject> objects = getContainer().lookupList(MockRoleHintObject.class);
 
       for (MockRoleHintObject object : objects) {
@@ -221,6 +232,18 @@ public class ContainerHolderTest extends ComponentTestCase {
    }
 
    public static interface MockInterface {
+   }
+
+   @Named
+   public static class MockMultipleRoleHints {
+      @Inject
+      private MockInterface m_default;
+
+      @Inject("secondary")
+      private MockInterface m_secondary;
+
+      @Inject("third")
+      private MockInterface m_third;
    }
 
    @Named(type = MockInterface.class)

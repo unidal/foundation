@@ -141,14 +141,14 @@ public class ComponentFactoryTest extends ComponentTestCase {
 
                if (instance == null) {
                   try {
-                     instance = clazz.newInstance();
+                     instance = clazz.getDeclaredConstructor().newInstance();
                      m_cache.put(roleHint, instance);
                   } catch (Throwable e) {
                      throw new ComponentLookupException("Error when lookup component due to " + e, role, roleHint);
                   }
                } else if (roleHint.equals("per-lookup")) {
                   try {
-                     instance = clazz.newInstance();
+                     instance = clazz.getDeclaredConstructor().newInstance();
                   } catch (Throwable e) {
                      throw new ComponentLookupException("Error when lookup component due to " + e, role, roleHint);
                   }

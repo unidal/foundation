@@ -282,10 +282,7 @@ public class Objects {
                Object value;
 
                try {
-                  if (!getter.isAccessible()) {
-                     getter.setAccessible(true);
-                  }
-
+                  getter.setAccessible(true);
                   value = getter.invoke(obj);
                } catch (Exception e) {
                   // ignore it
@@ -484,10 +481,7 @@ public class Objects {
                Object value;
 
                try {
-                  if (!getter.isAccessible()) {
-                     getter.setAccessible(true);
-                  }
-
+                  getter.setAccessible(true);
                   value = getter.invoke(obj);
                } catch (Exception e) {
                   // ignore it

@@ -10,32 +10,32 @@ public interface ComponentFactory {
     * Returns true if this container has a component with the given role/role-hint.
     * 
     * @param role
-    *           the non-unique type of the component
+    *           the type of the component
     * @param roleHint
-    *           a hint for the desired component implementation
-    * @return true if this container has a component with the given role/role-hint
+    *           a role hint to differentiate the implementation of component
+    * @return true if this container has the component with the given role/role-hint
     */
    boolean hasComponent(String role, String roleHint);
 
    /**
-    * Looks up and returns a component object with the given unique role/role-hint combination.
+    * Looks up the component with the given role/role-hint.
     * 
     * @param role
-    *           the non-unique type of the component
+    *           the type of the component
     * @param roleHint
-    *           a hint for the desired component implementation
-    * @return an instance of component object
+    *           a role hint to differentiate the implementation of component
+    * @return an instance of the component
     * @throws ComponentLookupException
-    *            when error
+    *            when error occurs
     */
    Object lookup(String role, String roleHint) throws ComponentLookupException;
 
    /**
-    * Returns available list of component role hints.
+    * Returns a list of role hints of the given component.
     * 
     * @param role
-    *           the non-unique type of the component
-    * @return list of component role hints
+    *           the type of the component
+    * @return list of the component role hints, null otherwise
     */
    public List<String> getRoleHints(String role);
 }

@@ -110,7 +110,7 @@ public class ComponentFactoryTest extends ComponentTestCase {
    public static interface I1 {
    }
 
-   @Named(type = ComponentFactory.class)
+   @Named(type = ComponentFactory.class, value = "Mock")
    public static class MockComponentFactory implements ComponentFactory {
       private Map<String, Class<?>> m_map = new HashMap<String, Class<?>>();
 
@@ -123,7 +123,11 @@ public class ComponentFactoryTest extends ComponentTestCase {
 
       @Override
       public List<String> getRoleHints(String role) {
-         return Arrays.asList("singleton", "per-lookup");
+         if (role.equals(I1.class.getName())) {
+            return Arrays.asList("singleton", "per-lookup");
+         } else {
+            return null;
+         }
       }
 
       @Override

@@ -6,10 +6,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
-import org.unidal.concurrent.AbstractActor;
-import org.unidal.concurrent.AbstractActorContext;
-import org.unidal.concurrent.Stage;
-import org.unidal.concurrent.StageManager;
 import org.unidal.lookup.ComponentTestCase;
 
 public class ActorTest extends ComponentTestCase {

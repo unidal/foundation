@@ -31,16 +31,13 @@ public class ComponentBox<T> {
          if (clazz == null) {
             message = String.format("Class(%s) is not found!", model.getImplementation());
          } else {
-            return (T) clazz.newInstance();
+            return (T) clazz.getDeclaredConstructor().newInstance();
          }
-      } catch (InstantiationException e) {
-         message = String.format("Class(%s) is not accessible!", clazz.getName());
-         cause = e;
-      } catch (IllegalAccessException e) {
-         message = String.format("Constructor of class(%s) is not accessible!", clazz.getName());
-         cause = e;
       } catch (NoClassDefFoundError e) {
          message = String.format("Class(%s) is not found!", clazz.getName());
+         cause = e;
+      } catch (Exception e) {
+         message = String.format("Unable to create instance of Class(%s)!", clazz.getName());
          cause = e;
       }
 

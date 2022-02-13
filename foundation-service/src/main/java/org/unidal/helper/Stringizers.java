@@ -204,10 +204,7 @@ public class Stringizers {
                Object value;
 
                try {
-                  if (!getter.isAccessible()) {
-                     getter.setAccessible(true);
-                  }
-
+                  getter.setAccessible(true);
                   value = getter.invoke(obj);
                } catch (Exception e) {
                   // ignore it
@@ -258,8 +255,11 @@ public class Stringizers {
 
    static class LengthLimiter {
       private int m_maxLength;
+
       private int m_maxItemLength;
+
       private int m_halfMaxItemLength;
+
       private StringBuilder m_sb;
 
       public LengthLimiter(StringBuilder sb, int maxLength, int maxItemLength) {

@@ -66,9 +66,9 @@ public class NodeConverterTest extends TestCase {
       List<Integer> integerList = model1.getField6();
       assertEquals(3, integerList.size());
 
-      assertEquals(new Integer(2), integerList.get(0));
-      assertEquals(new Integer(3), integerList.get(1));
-      assertEquals(new Integer(4), integerList.get(2));
+      assertEquals(Integer.valueOf(2), integerList.get(0));
+      assertEquals(Integer.valueOf(3), integerList.get(1));
+      assertEquals(Integer.valueOf(4), integerList.get(2));
 
       Element field8 = createElement(doc, "field8");
       node.appendChild(field8);

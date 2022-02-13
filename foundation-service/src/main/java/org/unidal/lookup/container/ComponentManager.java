@@ -29,12 +29,13 @@ public class ComponentManager {
 
    private LoggerManager m_loggerManager;
 
-   private ComponentFactory m_factory; // external component factory to extend the container capability
+   private ComponentFactoryManager m_factoryManager;
 
    public ComponentManager(PlexusContainer container, InputStream in) throws Exception {
       m_container = container;
-      m_modelManager = new ComponentModelManager();
       m_lifecycle = new ComponentLifecycle(this);
+      m_factoryManager = new ComponentFactoryManager();
+      m_modelManager = new ComponentModelManager();
 
       if (in != null) {
          m_modelManager.loadComponents(in);
@@ -48,21 +49,18 @@ public class ComponentManager {
       register(new ComponentKey(PlexusContainer.class, null), container);
       register(new ComponentKey(Logger.class, null), m_loggerManager.getLoggerForComponent(""));
 
-      initComponentFactory();
+      m_factoryManager.initialize();
    }
 
-   public void addComponentModel(ComponentModel component) {
+   void addComponentModel(ComponentModel component) {
       m_modelManager.addComponent(component);
 
-      String role = component.getRole();
-      String roleHint = component.getRoleHint();
-
-      if (ComponentFactory.class.getName().equals(role) && (roleHint == null || "default".equals(roleHint))) {
-         initComponentFactory();
+      if (ComponentFactory.class.getName().equals(component.getRole())) {
+         m_factoryManager.initialize();
       }
    }
 
-   public void destroy() {
+   void destroy() {
       for (ComponentBox<?> box : m_components.values()) {
          box.destroy();
       }
@@ -81,20 +79,6 @@ public class ComponentManager {
 
    public boolean hasComponent(ComponentKey key) {
       return m_modelManager.hasComponentModel(key);
-   }
-
-   private void initComponentFactory() {
-      // allow external component container(i.e. Spring) to plug in
-      ComponentKey key = new ComponentKey(ComponentFactory.class, "default");
-
-      if (hasComponent(key)) {
-         try {
-            m_factory = lookup(key);
-         } catch (ComponentLookupException e) {
-            // ignore it
-            e.printStackTrace();
-         }
-      }
    }
 
    public void log(String pattern, Object... args) {
@@ -117,8 +101,8 @@ public class ComponentManager {
       }
 
       // external factory takes priority
-      if (m_factory != null && m_factory.hasComponent(role, roleHint)) {
-         return (T) m_factory.lookup(role, roleHint);
+      if (m_factoryManager.hasComponent(role, roleHint)) {
+         return (T) m_factoryManager.lookup(role, roleHint);
       } else {
          ComponentModel model = m_modelManager.getComponentModel(key);
 
@@ -134,23 +118,20 @@ public class ComponentManager {
    public <T> List<T> lookupList(String role) throws ComponentLookupException {
       List<T> components = new ArrayList<T>();
       Set<String> done = new HashSet<String>();
+      List<String> roleHints1 = m_factoryManager.getRoleHints(role);
 
-      if (m_factory != null) {
-         List<String> roleHints = m_factory.getRoleHints(role);
+      if (roleHints1 != null) {
+         for (String roleHint : roleHints1) {
+            T component = (T) m_factoryManager.lookup(role, roleHint);
 
-         if (roleHints != null && !roleHints.isEmpty()) {
-            for (String roleHint : roleHints) {
-               T component = (T) m_factory.lookup(role, roleHint);
-
-               components.add(component);
-               done.add(roleHint);
-            }
+            components.add(component);
+            done.add(roleHint);
          }
       }
 
-      List<String> roleHints = m_modelManager.getRoleHints(role);
+      List<String> roleHints2 = m_modelManager.getRoleHints(role);
 
-      for (String roleHint : roleHints) {
+      for (String roleHint : roleHints2) {
          if (!done.contains(roleHint)) {
             T component = lookup(new ComponentKey(role, roleHint));
 
@@ -166,23 +147,20 @@ public class ComponentManager {
    public <T> Map<String, T> lookupMap(String role) throws ComponentLookupException {
       Map<String, T> components = new LinkedHashMap<String, T>();
       Set<String> done = new HashSet<String>();
+      List<String> roleHints1 = m_factoryManager.getRoleHints(role);
 
-      if (m_factory != null) {
-         List<String> roleHints = m_factory.getRoleHints(role);
+      if (roleHints1 != null && !roleHints1.isEmpty()) {
+         for (String roleHint : roleHints1) {
+            T component = (T) m_factoryManager.lookup(role, roleHint);
 
-         if (roleHints != null && !roleHints.isEmpty()) {
-            for (String roleHint : roleHints) {
-               T component = (T) m_factory.lookup(role, roleHint);
-
-               components.put(roleHint, component);
-               done.add(roleHint);
-            }
+            components.put(roleHint, component);
+            done.add(roleHint);
          }
       }
 
-      List<String> roleHints = m_modelManager.getRoleHints(role);
+      List<String> roleHints2 = m_modelManager.getRoleHints(role);
 
-      for (String roleHint : roleHints) {
+      for (String roleHint : roleHints2) {
          if (!done.contains(roleHint)) {
             T component = lookup(new ComponentKey(role, roleHint));
 
@@ -194,14 +172,87 @@ public class ComponentManager {
       return components;
    }
 
-   public void register(ComponentKey key, Object component) {
+   void register(ComponentKey key, Object component) {
       ComponentBox<Object> box = new ComponentBox<Object>(m_lifecycle).register(key, component);
 
       m_components.put(key.getRole(), box);
       m_modelManager.setComponentModel(key, component.getClass());
    }
 
-   public void release(Object component) {
+   void release(Object component) {
       m_lifecycle.stop(component);
+   }
+
+   private class ComponentFactoryManager {
+      // in order
+      private List<ComponentFactory> m_factories = new ArrayList<ComponentFactory>();
+
+      public List<String> getRoleHints(String role) {
+         List<String> roleHints = new ArrayList<String>();
+
+         for (ComponentFactory factory : m_factories) {
+            try {
+               List<String> hints = factory.getRoleHints(role);
+
+               if (hints != null) {
+                  for (String hint : hints) {
+                     if (!roleHints.contains(hint)) {
+                        roleHints.add(hint);
+                     }
+                  }
+               }
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+
+         return roleHints;
+      }
+
+      public boolean hasComponent(String role, String roleHint) {
+         for (ComponentFactory factory : m_factories) {
+            try {
+               if (factory.hasComponent(role, roleHint)) {
+                  return true;
+               }
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+
+         return false;
+      }
+
+      public void initialize() {
+         String role = ComponentFactory.class.getName();
+         List<String> roleHints = m_modelManager.getRoleHints(role);
+         List<ComponentFactory> factories = new ArrayList<ComponentFactory>();
+
+         for (String roleHint : roleHints) {
+            try {
+               ComponentFactory component = ComponentManager.this.lookup(new ComponentKey(role, roleHint));
+
+               factories.add(component);
+            } catch (ComponentLookupException e) {
+               e.printStackTrace();
+            }
+         }
+
+         m_factories = factories;
+      }
+
+      public Object lookup(String role, String roleHint) throws ComponentLookupException {
+         for (ComponentFactory factory : m_factories) {
+            try {
+               if (factory.hasComponent(role, roleHint)) {
+                  return factory.lookup(role, roleHint);
+               }
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+
+         throw new ComponentLookupException("No component defined!", role, roleHint);
+      }
    }
 }

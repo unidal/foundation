@@ -14,9 +14,9 @@ public class ArrayConverterTest extends TestCase {
       Integer[] integerArray = (Integer[]) m_manager.convert(new String[] { "1", "2", "3" }, Integer[].class);
 
       assertEquals(3, integerArray.length);
-      assertEquals(new Integer(1), integerArray[0]);
-      assertEquals(new Integer(2), integerArray[1]);
-      assertEquals(new Integer(3), integerArray[2]);
+      assertEquals(Integer.valueOf(1), integerArray[0]);
+      assertEquals(Integer.valueOf(2), integerArray[1]);
+      assertEquals(Integer.valueOf(3), integerArray[2]);
 
       int[] intArray = (int[]) m_manager.convert(new String[] { "1", "2", "3" }, int[].class);
 
@@ -28,9 +28,9 @@ public class ArrayConverterTest extends TestCase {
       Long[] fromList = (Long[]) m_manager.convert(Arrays.asList("1", "2", "3", true), Long[].class);
 
       assertEquals(4, fromList.length);
-      assertEquals(new Long(1), fromList[0]);
-      assertEquals(new Long(2), fromList[1]);
-      assertEquals(new Long(3), fromList[2]);
-      assertEquals(new Long(1), fromList[3]);
+      assertEquals(Long.valueOf(1), fromList[0]);
+      assertEquals(Long.valueOf(2), fromList[1]);
+      assertEquals(Long.valueOf(3), fromList[2]);
+      assertEquals(Long.valueOf(1), fromList[3]);
    }
 }

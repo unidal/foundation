@@ -28,7 +28,7 @@ public class NodeConverter implements Converter<Object> {
       Class<?> concreteClass = ConverterManager.getInstance().getRegistry().findType(clazz);
 
       try {
-         Object instance = concreteClass.newInstance();
+         Object instance = concreteClass.getDeclaredConstructor().newInstance();
 
          convertAttributes(instance, node.getAttributes());
          convertNodeList(instance, node.getChildNodes());

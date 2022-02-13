@@ -11,7 +11,7 @@ public class ReflectUtils {
          if (clazz == null) {
             return null;
          } else {
-            return (T) clazz.newInstance();
+            return (T) clazz.getDeclaredConstructor().newInstance();
          }
       } catch (Exception e) {
          throw new RuntimeException("Error occured during creating instance of " + clazz, e);
@@ -20,10 +20,7 @@ public class ReflectUtils {
 
    public static Object getField(Field field, Object instance) throws RuntimeException {
       try {
-         if (!field.isAccessible()) {
-            field.setAccessible(true);
-         }
-
+         field.setAccessible(true);
          return field.get(instance);
       } catch (Exception e) {
          throw new RuntimeException("Error occured during getting field: " + field, e.getCause());
@@ -55,14 +52,11 @@ public class ReflectUtils {
 
    public static void setField(Field field, Object instance, Object value) throws RuntimeException {
       try {
-         if (!field.isAccessible()) {
-            field.setAccessible(true);
-         }
-
+         field.setAccessible(true);
          field.set(instance, value);
       } catch (Exception e) {
-         throw new RuntimeException("Error occured during setting field: " + field + " with value(" + value + ")", e
-               .getCause());
+         throw new RuntimeException("Error occured during setting field: " + field + " with value(" + value + ")",
+               e.getCause());
       }
    }
 }

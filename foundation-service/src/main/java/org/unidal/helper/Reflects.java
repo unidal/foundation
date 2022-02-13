@@ -45,7 +45,8 @@ public class Reflects {
       /**
        * for class name like "a.b.C" or "a.b.C$D$E"
        * 
-       * @param className class name
+       * @param className
+       *           class name
        * @return class from current context class loader
        */
       public Class<?> getClass(String className) {
@@ -55,8 +56,10 @@ public class Reflects {
       /**
        * for class name like "a.b.C" or "a.b.C$D$E"
        * 
-       * @param className class name
-       * @param classloader class loader
+       * @param className
+       *           class name
+       * @param classloader
+       *           class loader
        * @return class from current context class loader
        */
       public Class<?> getClass(String className, ClassLoader classloader) {
@@ -91,7 +94,8 @@ public class Reflects {
       /**
        * for class name like "a.b.C" or "a.b.C.D.E"
        * 
-       * @param className class name
+       * @param className
+       *           class name
        * @return class from current context class loader
        */
       public Class<?> getClass2(String className) {
@@ -101,8 +105,10 @@ public class Reflects {
       /**
        * for class name like "a.b.C" or "a.b.C.D.E"
        * 
-       * @param className class name
-       * @param classloader class loader
+       * @param className
+       *           class name
+       * @param classloader
+       *           class loader
        * @return class from current context class loader
        */
       public Class<?> getClass2(String className, ClassLoader classloader) {
@@ -280,10 +286,7 @@ public class Reflects {
 
          if (field != null) {
             try {
-               if (!field.isAccessible()) {
-                  field.setAccessible(true);
-               }
-
+               field.setAccessible(true);
                return (T) field.get(instance);
             } catch (Exception e) {
                // ignore
@@ -371,10 +374,7 @@ public class Reflects {
 
          if (field != null) {
             try {
-               if (!field.isAccessible()) {
-                  field.setAccessible(true);
-               }
-
+               field.setAccessible(true);
                field.set(instance, value);
                return true;
             } catch (Exception e) {
@@ -735,8 +735,8 @@ public class Reflects {
          int length = typesAndParameters.length;
 
          if (length % 2 != 0) {
-            throw new IllegalArgumentException(String.format("Constrcutor argument types and data should be even"
-                  + ", but was odd: %s.", length));
+            throw new IllegalArgumentException(
+                  String.format("Constrcutor argument types and data should be even" + ", but was odd: %s.", length));
          }
 
          int half = length / 2;

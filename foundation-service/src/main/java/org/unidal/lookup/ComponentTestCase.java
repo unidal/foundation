@@ -48,7 +48,7 @@ public abstract class ComponentTestCase extends ContainerHolder {
    }
 
    protected <T> ComponentDefinition<T> define(Class<T> implementation) throws Exception {
-      Named named = implementation.getAnnotation(Named.class);
+      Named named = implementation.getDeclaredAnnotation(Named.class);
 
       if (named == null) {
          String name = implementation.getName();

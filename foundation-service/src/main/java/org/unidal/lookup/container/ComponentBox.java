@@ -1,5 +1,6 @@
 package org.unidal.lookup.container;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,10 @@ public class ComponentBox<T> {
          if (clazz == null) {
             message = String.format("Class(%s) is not found!", model.getImplementation());
          } else {
-            return (T) clazz.getDeclaredConstructor().newInstance();
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            
+            constructor.setAccessible(true);
+            return (T) constructor.newInstance();
          }
       } catch (NoClassDefFoundError e) {
          message = String.format("Class(%s) is not found!", clazz.getName());

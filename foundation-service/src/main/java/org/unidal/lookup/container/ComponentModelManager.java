@@ -86,28 +86,18 @@ public class ComponentModelManager {
    }
 
    private void loadCompoents(URL url) throws IOException, SAXException {
-      // ignore internals components.xml files within official
-      // plexus-container-default.jar
-      if (url.getPath().contains("/plexus-container-default/")) {
-         return;
-      }
-
       InputStream in = url.openStream();
       String xml = Files.forIO().readFrom(in, "utf-8");
 
-      // to be compatible with plexus.xml
-      if (xml != null && xml.contains("<component-set>")) {
-         xml = xml.replace("<component-set>", "<plexus>");
-         xml = xml.replace("</component-set>", "</plexus>");
-      }
+      if (xml.contains("<plexus>")) {
+         try {
+            PlexusModel model = DefaultSaxParser.parse(xml);
 
-      try {
-         PlexusModel model = DefaultSaxParser.parse(xml);
-
-         m_models.add(model);
-      } catch (SAXException e) {
-         System.err.println(String.format("Bad plexus resource(%s): %s", url, xml));
-         throw new IOException(String.format("Bad plexus resource(%s)! " + e, url), e);
+            m_models.add(model);
+         } catch (SAXException e) {
+            System.err.println(String.format("Bad plexus resource(%s): %s", url, xml));
+            throw new IOException(String.format("Bad plexus resource(%s)! " + e, url), e);
+         }
       }
    }
 
@@ -141,27 +131,18 @@ public class ComponentModelManager {
       Scanners.forResource().scan("META-INF/plexus", new ResourceMatcher() {
          @Override
          public Direction matches(URL base, String path) {
-            if (!path.endsWith(".xml")) {
-               return Direction.DOWN;
-            }
-
-            // ignore configuration from official plexus-container-default.jar
-            if (path.contains("/plexus-container-default/")) {
-               return Direction.DOWN;
-            }
-
-            if (path.equals("plexus.xml") || path.equals("components.xml") || path.startsWith("components-")) {
+            if (path.startsWith("components-") && path.endsWith(".xml")) {
                try {
-                  String baseUrl = base.toExternalForm();
-                  String url;
+                  components.add(new URL(base + "/" + path));
 
-                  if (baseUrl.endsWith("/")) {
-                     url = baseUrl + path;
-                  } else {
-                     url = baseUrl + "/" + path;
-                  }
+                  return Direction.MATCHED;
+               } catch (Throwable e) {
+                  // ignore it
+               }
+            } else if (path.equals("components.xml")) {
+               try {
+                  components.add(new URL(base + "/" + path));
 
-                  components.add(new URL(url));
                   return Direction.MATCHED;
                } catch (Throwable e) {
                   // ignore it

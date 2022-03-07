@@ -31,6 +31,8 @@ public class ComponentManager {
 
    private ComponentFactoryManager m_factoryManager;
 
+   private Set<ComponentKey> m_hijacked = new HashSet<ComponentKey>();
+
    public ComponentManager(PlexusContainer container, InputStream in) throws Exception {
       m_container = container;
       m_lifecycle = new ComponentLifecycle(this);
@@ -54,6 +56,7 @@ public class ComponentManager {
 
    void addComponentModel(ComponentModel component) {
       m_modelManager.addComponent(component);
+      m_hijacked.add(new ComponentKey(component.getRole(), component.getHint()));
 
       if (ComponentFactory.class.getName().equals(component.getRole())) {
          m_factoryManager.initialize();
@@ -100,8 +103,8 @@ public class ComponentManager {
          m_components.put(role, box);
       }
 
-      // external factory takes priority
-      if (m_factoryManager.hasComponent(role, roleHint)) {
+      // NOT hijacked and not defined in any component factory
+      if (!m_hijacked.contains(key) && m_factoryManager.hasComponent(role, roleHint)) {
          return (T) m_factoryManager.lookup(role, roleHint);
       } else {
          ComponentModel model = m_modelManager.getComponentModel(key);
@@ -118,14 +121,26 @@ public class ComponentManager {
    public <T> List<T> lookupList(String role) throws ComponentLookupException {
       List<T> components = new ArrayList<T>();
       Set<String> done = new HashSet<String>();
+
+      for (ComponentKey key : m_hijacked) {
+         if (role.equals(key.getRole())) {
+            T component = lookup(key);
+
+            components.add(component);
+            done.add(key.getRoleHint());
+         }
+      }
+
       List<String> roleHints1 = m_factoryManager.getRoleHints(role);
 
       if (roleHints1 != null) {
          for (String roleHint : roleHints1) {
-            T component = (T) m_factoryManager.lookup(role, roleHint);
+            if (!done.contains(roleHint)) {
+               T component = (T) m_factoryManager.lookup(role, roleHint);
 
-            components.add(component);
-            done.add(roleHint);
+               components.add(component);
+               done.add(roleHint);
+            }
          }
       }
 
@@ -147,14 +162,26 @@ public class ComponentManager {
    public <T> Map<String, T> lookupMap(String role) throws ComponentLookupException {
       Map<String, T> components = new LinkedHashMap<String, T>();
       Set<String> done = new HashSet<String>();
+
+      for (ComponentKey key : m_hijacked) {
+         if (role.equals(key.getRole())) {
+            T component = lookup(key);
+
+            components.put(key.getRoleHint(), component);
+            done.add(key.getRoleHint());
+         }
+      }
+
       List<String> roleHints1 = m_factoryManager.getRoleHints(role);
 
       if (roleHints1 != null && !roleHints1.isEmpty()) {
          for (String roleHint : roleHints1) {
-            T component = (T) m_factoryManager.lookup(role, roleHint);
+            if (!done.contains(roleHint)) {
+               T component = (T) m_factoryManager.lookup(role, roleHint);
 
-            components.put(roleHint, component);
-            done.add(roleHint);
+               components.put(roleHint, component);
+               done.add(roleHint);
+            }
          }
       }
 

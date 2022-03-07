@@ -22,43 +22,8 @@ import org.unidal.lookup.container.model.entity.RequirementModel;
 public abstract class ComponentTestCase extends ContainerHolder {
    private PlexusContainer m_container;
 
-   private Class<?> getElementType(Field field) {
-      Type type = field.getGenericType();
-      Class<?> clazz = field.getType();
-
-      if (clazz.isArray()) {
-         return clazz.getComponentType();
-      } else {
-         if (type instanceof ParameterizedType) {
-            Type[] args = ((ParameterizedType) type).getActualTypeArguments();
-
-            if (clazz == List.class || clazz == Set.class) {
-               if (args.length == 1) {
-                  return (Class<?>) args[0];
-               }
-            } else if (clazz == Map.class) {
-               if (args.length == 2) {
-                  return (Class<?>) args[1];
-               }
-            }
-         }
-      }
-
-      return field.getType();
-   }
-
    protected <T> ComponentDefinition<T> define(Class<T> implementation) throws Exception {
-      Named named = implementation.getDeclaredAnnotation(Named.class);
-
-      if (named == null) {
-         String name = implementation.getName();
-
-         throw new IllegalArgumentException(String.format("Class(%s) should be annotated with @Named!", name));
-      }
-
-      String roleHint = (named.value().length() > 0 ? named.value() : null);
-
-      return define(implementation, roleHint);
+      return define(implementation, null);
    }
 
    @SuppressWarnings("unchecked")
@@ -72,6 +37,11 @@ public abstract class ComponentTestCase extends ContainerHolder {
       }
 
       Class<T> role = (named.type() != Named.Default.class ? (Class<T>) named.type() : implementation);
+
+      if (roleHint == null && named.value().length() > 0) {
+         roleHint = named.value();
+      }
+
       ComponentDefinition<T> component = defineComponent(role, roleHint, implementation);
 
       if (named.instantiationStrategy().length() > 0) {
@@ -99,10 +69,7 @@ public abstract class ComponentTestCase extends ContainerHolder {
 
       model.setImplementation(implementation.getName());
       model.setRole(role.getName());
-
-      if (roleHint != null) {
-         model.setRoleHint(roleHint);
-      }
+      model.setRoleHint(roleHint);
 
       getContainer().addComponentModel(model);
       return new ComponentDefinition<T>(model);
@@ -123,31 +90,28 @@ public abstract class ComponentTestCase extends ContainerHolder {
 
    private void defineDependency(ComponentDefinition<?> component, Field field) {
       Inject inject = field.getAnnotation(Inject.class);
+      Class<?> role = inject.type();
+      String[] roleHints = inject.value();
+      Class<?> type = field.getType();
+      Class<?> elementType = getElementType(field);
 
-      if (inject != null) {
-         Class<?> role = inject.type();
-         String[] roleHints = inject.value();
-         Class<?> type = field.getType();
-         Class<?> elementType = getElementType(field);
+      if (role == Inject.Default.class) {
+         role = elementType;
+      }
 
-         if (role == Inject.Default.class) {
-            role = elementType;
+      if (type == elementType) { // normal simple case
+         if (roleHints.length == 0) {
+            component.req(role, (String) null, field.getName());
+         } else if (roleHints.length == 1) {
+            component.req(role, roleHints[0], field.getName());
+         } else {
+            component.req(role, roleHints, field.getName());
          }
-
-         if (type == elementType) { // normal simple case
-            if (roleHints.length == 0) {
-               component.req(role, (String) null, field.getName());
-            } else if (roleHints.length == 1) {
-               component.req(role, roleHints[0], field.getName());
-            } else {
-               component.req(role, roleHints, field.getName());
-            }
-         } else { // List, Set or Array
-            if (roleHints.length == 0) {
-               component.req(role, (String[]) null, field.getName());
-            } else {
-               component.req(role, roleHints, field.getName());
-            }
+      } else { // List, Set or Array
+         if (roleHints.length == 0) {
+            component.req(role, (String[]) null, field.getName());
+         } else {
+            component.req(role, roleHints, field.getName());
          }
       }
    }
@@ -155,6 +119,31 @@ public abstract class ComponentTestCase extends ContainerHolder {
    @Override
    protected PlexusContainer getContainer() {
       return m_container;
+   }
+
+   private Class<?> getElementType(Field field) {
+      Type type = field.getGenericType();
+      Class<?> clazz = field.getType();
+
+      if (clazz.isArray()) {
+         return clazz.getComponentType();
+      } else {
+         if (type instanceof ParameterizedType) {
+            Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+
+            if (clazz == List.class || clazz == Set.class) {
+               if (args.length == 1) {
+                  return (Class<?>) args[0];
+               }
+            } else if (clazz == Map.class) {
+               if (args.length == 2) {
+                  return (Class<?>) args[1];
+               }
+            }
+         }
+      }
+
+      return field.getType();
    }
 
    @Before
@@ -176,8 +165,8 @@ public abstract class ComponentTestCase extends ContainerHolder {
    protected static final class ComponentDefinition<T> {
       private ComponentModel m_model;
 
-      public ComponentDefinition(ComponentModel descriptor) {
-         m_model = descriptor;
+      public ComponentDefinition(ComponentModel model) {
+         m_model = model;
       }
 
       public ComponentDefinition<T> config(String name, String value) {

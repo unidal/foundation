@@ -17,7 +17,6 @@ public class ComponentFactoryTest extends ComponentTestCase {
    @Test
    public void testFactory() throws Exception {
       define(C10.class);
-      define(C11.class); // this will be overridden
       define(MockComponentFactory.class);
 
       I1 c101 = lookup(I1.class);
@@ -34,8 +33,19 @@ public class ComponentFactoryTest extends ComponentTestCase {
       List<I1> list = lookupList(I1.class);
       Map<String, I1> map = lookupMap(I1.class);
 
-      Assert.assertEquals("[C11:false, C12:false, C10:true]", list.toString());
-      Assert.assertEquals("{singleton=C11:false, per-lookup=C12:false, default=C10:true}", map.toString());
+      Assert.assertEquals("[C10:true, C11:false, C12:false]", list.toString());
+      Assert.assertEquals("{default=C10:true, singleton=C11:false, per-lookup=C12:false}", map.toString());
+   }
+
+   @Test
+   public void testFactoryAndHijack() throws Exception {
+      define(C10.class);
+      define(C11.class); // this will take priority
+      define(MockComponentFactory.class);
+
+      I1 i1 = lookup(I1.class, "singleton");
+
+      Assert.assertEquals("C11:true", i1.toString());
    }
 
    @Test
@@ -58,8 +68,8 @@ public class ComponentFactoryTest extends ComponentTestCase {
       List<I1> list = lookupList(I1.class);
       Map<String, I1> map = lookupMap(I1.class);
 
-      Assert.assertEquals("[C10:true, C11:true, C12:true]", list.toString());
-      Assert.assertEquals("{default=C10:true, singleton=C11:true, per-lookup=C12:true}", map.toString());
+      Assert.assertEquals("[C11:true, C12:true, C10:true]", list.toString());
+      Assert.assertEquals("{singleton=C11:true, per-lookup=C12:true, default=C10:true}", map.toString());
    }
 
    @Named(type = I1.class)
@@ -158,6 +168,7 @@ public class ComponentFactoryTest extends ComponentTestCase {
                   }
                }
 
+               // Note: instance is created without the method initialize() been called
                return instance;
             }
          }

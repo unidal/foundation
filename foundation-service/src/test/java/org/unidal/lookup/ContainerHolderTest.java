@@ -4,11 +4,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.Assert;
@@ -124,9 +127,18 @@ public class ContainerHolderTest extends ComponentTestCase {
       MockInterface o2 = container.lookup(MockInterface.class, "secondary");
       MockInterface o3 = container.lookup(MockInterface.class, "third");
       List<MockInterface> list = container.lookupList(MockInterface.class);
-      int index = 0;
 
-      Assert.assertEquals("[MockObject, MockObject2, MockObject3, FIELD1, FIELD2]", list.toString());
+      Collections.sort(list, new Comparator<MockInterface>() {
+         @Override
+         public int compare(MockInterface o1, MockInterface o2) {
+            return o1.toString().compareTo(o2.toString());
+         }
+      });
+
+      Assert.assertEquals("[FIELD1, FIELD2, MockObject, MockObject2, MockObject3]", list.toString());
+
+      int index = 2;
+
       Assert.assertSame(o1, list.get(index++));
       Assert.assertSame(o2, list.get(index++));
       Assert.assertSame(o3, list.get(index++));
@@ -140,9 +152,8 @@ public class ContainerHolderTest extends ComponentTestCase {
       MockInterface o3 = container.lookup(MockInterface.class, "third");
       Map<String, MockInterface> map = container.lookupMap(MockInterface.class);
 
-      Assert.assertEquals(
-            "{default=MockObject, secondary=MockObject2, third=MockObject3," + " FIELD1=FIELD1, FIELD2=FIELD2}",
-            map.toString());
+      String expected = "{FIELD1=FIELD1, FIELD2=FIELD2, default=MockObject, secondary=MockObject2, third=MockObject3}";
+      Assert.assertEquals(expected, new TreeMap<String, MockInterface>(map).toString());
       Assert.assertSame(o1, map.get("default"));
       Assert.assertSame(o2, map.get("secondary"));
       Assert.assertSame(o3, map.get("third"));

@@ -5,7 +5,6 @@
          <role-hint>role-hint</role-hint>
          <implementation>implementation</implementation>
          <instantiation-strategy>instantiation-strategy</instantiation-strategy>
-         <override-origin>true</override-origin>
          <configuration>
             <debug>true</debug>
          </configuration>

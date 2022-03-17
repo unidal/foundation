@@ -9,8 +9,6 @@ public class Constants {
 
    public static final String ELEMENT_INSTANTIATION_STRATEGY = "instantiation-strategy";
 
-   public static final String ELEMENT_OVERRIDE_ORIGIN = "override-origin";
-
    public static final String ELEMENT_ROLE = "role";
 
    public static final String ELEMENT_ROLE_HINT = "role-hint";

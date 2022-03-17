@@ -94,16 +94,6 @@ public class Component {
       return this;
    }
 
-   /**
-    * Override original component, it has higher priority than original component despite of order of classpath.
-    * 
-    * @return component
-    */
-   public Component override() {
-      m_model.setOverrideOrigin(true);
-      return this;
-   }
-
    public Component req(Class<?>... roleClasses) {
       for (Class<?> roleClass : roleClasses) {
          req(roleClass, "default", null);

@@ -150,15 +150,13 @@ public abstract class ComponentTestCase extends ContainerHolder {
    public void setUp() throws Exception {
       String configuration = getClass().getName().replace('.', '/') + ".xml";
 
-      ContainerLoader.destroy();
-      m_container = ContainerLoader.getDefaultContainer(configuration);
-      System.setProperty("devMode", "true");
+      m_container = ContainerLoader.getContainer(configuration);
    }
 
    @After
    public void tearDown() throws Exception {
-      ContainerLoader.destroy();
       Threads.reset();
+      ContainerLoader.destroy();
       m_container = null;
    }
 

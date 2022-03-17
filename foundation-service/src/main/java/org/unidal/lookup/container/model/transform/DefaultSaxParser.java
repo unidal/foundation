@@ -4,7 +4,6 @@ package org.unidal.lookup.container.model.transform;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_FIELD_NAME;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_IMPLEMENTATION;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_INSTANTIATION_STRATEGY;
-import static org.unidal.lookup.container.model.Constants.ELEMENT_OVERRIDE_ORIGIN;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_ROLE;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_ROLE_HINT;
 
@@ -198,8 +197,6 @@ public class DefaultSaxParser extends DefaultHandler {
                component.setImplementation(getText());
             } else if (ELEMENT_INSTANTIATION_STRATEGY.equals(currentTag)) {
                component.setInstantiationStrategy(getText());
-            } else if (ELEMENT_OVERRIDE_ORIGIN.equals(currentTag)) {
-               component.setOverrideOrigin(convert(Boolean.class, getText(), null));
             }
          } else if (currentObj instanceof RequirementModel) {
             RequirementModel requirement = (RequirementModel) currentObj;
@@ -242,7 +239,7 @@ public class DefaultSaxParser extends DefaultHandler {
    }
 
    private void parseForComponent(ComponentModel parentObj, String parentTag, String qName, Attributes attributes) throws SAXException {
-      if (ELEMENT_ROLE.equals(qName) || ELEMENT_ROLE_HINT.equals(qName) || ELEMENT_IMPLEMENTATION.equals(qName) || ELEMENT_INSTANTIATION_STRATEGY.equals(qName) || ELEMENT_OVERRIDE_ORIGIN.equals(qName) || ENTITY_REQUIREMENTS.equals(qName)) {
+      if (ELEMENT_ROLE.equals(qName) || ELEMENT_ROLE_HINT.equals(qName) || ELEMENT_IMPLEMENTATION.equals(qName) || ELEMENT_INSTANTIATION_STRATEGY.equals(qName) || ENTITY_REQUIREMENTS.equals(qName)) {
          m_objs.push(parentObj);
       } else if (ENTITY_CONFIGURATION.equals(qName)) {
          ConfigurationModel configuration = m_maker.buildConfiguration(attributes);

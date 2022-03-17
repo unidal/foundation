@@ -4,7 +4,6 @@ package org.unidal.lookup.container.model.transform;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_FIELD_NAME;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_IMPLEMENTATION;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_INSTANTIATION_STRATEGY;
-import static org.unidal.lookup.container.model.Constants.ELEMENT_OVERRIDE_ORIGIN;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_ROLE;
 import static org.unidal.lookup.container.model.Constants.ELEMENT_ROLE_HINT;
 import org.unidal.lookup.container.model.entity.Any;
@@ -316,8 +315,6 @@ public class DefaultXmlBuilder implements IVisitor {
       element(ELEMENT_IMPLEMENTATION, component.getImplementation(), null,  true);
 
       element(ELEMENT_INSTANTIATION_STRATEGY, component.getInstantiationStrategy(), null,  true);
-
-      tagWithText(ELEMENT_OVERRIDE_ORIGIN, component.getOverrideOrigin() == null ? null : String.valueOf(component.getOverrideOrigin()));
 
       if (component.getConfiguration() != null) {
          component.getConfiguration().accept(m_visitor);

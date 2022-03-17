@@ -16,8 +16,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
 
    private String m_instantiationStrategy;
 
-   private Boolean m_overrideOrigin;
-
    private ConfigurationModel m_configuration;
 
    private List<RequirementModel> m_requirements = new ArrayList<RequirementModel>();
@@ -58,10 +56,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
             return false;
          }
 
-         if (!equals(getOverrideOrigin(), _o.getOverrideOrigin())) {
-            return false;
-         }
-
          if (!equals(getConfiguration(), _o.getConfiguration())) {
             return false;
          }
@@ -96,10 +90,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
       return m_instantiationStrategy;
    }
 
-   public Boolean getOverrideOrigin() {
-      return m_overrideOrigin;
-   }
-
    public List<RequirementModel> getRequirements() {
       return m_requirements;
    }
@@ -120,7 +110,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
       hash = hash * 31 + (m_roleHint == null ? 0 : m_roleHint.hashCode());
       hash = hash * 31 + (m_implementation == null ? 0 : m_implementation.hashCode());
       hash = hash * 31 + (m_instantiationStrategy == null ? 0 : m_instantiationStrategy.hashCode());
-      hash = hash * 31 + (m_overrideOrigin == null ? 0 : m_overrideOrigin.hashCode());
       hash = hash * 31 + (m_configuration == null ? 0 : m_configuration.hashCode());
       for (RequirementModel e : m_requirements) {
          hash = hash * 31 + (e == null ? 0 :e.hashCode());
@@ -128,10 +117,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
 
 
       return hash;
-   }
-
-   public boolean isOverrideOrigin() {
-      return m_overrideOrigin != null && m_overrideOrigin.booleanValue();
    }
 
    @Override
@@ -155,11 +140,6 @@ public class ComponentModel extends BaseEntity<ComponentModel> {
 
    public ComponentModel setInstantiationStrategy(String instantiationStrategy) {
       m_instantiationStrategy = instantiationStrategy;
-      return this;
-   }
-
-   public ComponentModel setOverrideOrigin(Boolean overrideOrigin) {
-      m_overrideOrigin = overrideOrigin;
       return this;
    }
 

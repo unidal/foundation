@@ -37,15 +37,16 @@ public class ComponentModelManager {
    public ComponentModel getComponentModel(ComponentKey key) {
       ComponentModel model = m_cache.get(key);
 
-      for (PlexusModel plexus : m_models) {
-         for (ComponentModel component : plexus.getComponents()) {
-            if (key.matches(component.getRole(), component.getHint())) {
-               if (model == null) {
+      if (model == null) {
+         for (PlexusModel plexus : m_models) {
+            for (ComponentModel component : plexus.getComponents()) {
+               if (key.matches(component.getRole(), component.getHint())) {
                   model = component;
-               } else if (!model.isOverrideOrigin() && component.isOverrideOrigin()) { // component has been overridden
-                  model = component;
+                  break;
                }
+            }
 
+            if (model != null) {
                break;
             }
          }

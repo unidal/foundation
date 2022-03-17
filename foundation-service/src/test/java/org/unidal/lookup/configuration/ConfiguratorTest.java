@@ -42,7 +42,7 @@ public class ConfiguratorTest {
    private void checkLookup(AbstractResourceConfigurator configurator) throws Exception {
       String path = getClass().getPackage().getName().replace('.', '/');
       String resource = path + "/" + configurator.getClass().getSimpleName() + ".xml";
-      PlexusContainer container = ContainerLoader.getDefaultContainer(resource);
+      PlexusContainer container = ContainerLoader.getContainer(resource);
       List<Component> components = configurator.defineComponents();
 
       for (Component component : components) {

@@ -614,7 +614,7 @@ public class Reflects {
          Method method = getMethod(clazz, methodName, typeArgs.getTypes());
          if (method != null) {
             try {
-               return (T) method.invoke(null);
+               return (T) method.invoke(null, typeArgs.getArguments());
             } catch (Exception e) {
                // ignore it
             }

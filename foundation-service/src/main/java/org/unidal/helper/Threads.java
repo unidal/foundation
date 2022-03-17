@@ -78,6 +78,48 @@ public class Threads {
       }
    }
 
+   public static abstract class AbstractTask implements Task {
+      private AtomicBoolean m_enabled = new AtomicBoolean(true);
+
+      private CountDownLatch m_latch = new CountDownLatch(1);
+
+      @Override
+      public String getName() {
+         return getClass().getSimpleName();
+      }
+
+      @Override
+      public void run() {
+         try {
+            while (m_enabled.get()) {
+               runOnce();
+               yield();
+            }
+         } catch (InterruptedException e) {
+            // ignore it
+         } finally {
+            m_latch.countDown();
+         }
+      }
+
+      protected abstract void runOnce();
+
+      @Override
+      public void shutdown() {
+         m_enabled.set(false);
+
+         try {
+            m_latch.await();
+         } catch (InterruptedException e) {
+            // ignore it
+         }
+      }
+
+      protected void yield() throws InterruptedException {
+         TimeUnit.MILLISECONDS.sleep(1); // sleep 1 millisecond by default
+      }
+   }
+
    public static abstract class AbstractThreadListener implements ThreadListener {
       @Override
       public void onThreadGroupCreated(ThreadGroup group, String name) {
@@ -401,44 +443,6 @@ public class Threads {
          } else {
             System.out.println(String.format("Thread(%s) is shutdown! ", getName()));
             interrupt();
-         }
-      }
-   }
-
-   // the sample task is just a code template for copy & paste
-   static class SampleTask implements Task {
-      private AtomicBoolean m_enabled = new AtomicBoolean(true);
-
-      private CountDownLatch m_latch = new CountDownLatch(1);
-
-      @Override
-      public String getName() {
-         return getClass().getSimpleName();
-      }
-
-      @Override
-      public void run() {
-         try {
-            while (m_enabled.get()) {
-               // your job goes here
-
-               TimeUnit.MILLISECONDS.sleep(1000); // sleep 1 second
-            }
-         } catch (InterruptedException e) {
-            // ignore it
-         } finally {
-            m_latch.countDown();
-         }
-      }
-
-      @Override
-      public void shutdown() {
-         m_enabled.set(false);
-
-         try {
-            m_latch.await();
-         } catch (InterruptedException e) {
-            // ignore it
          }
       }
    }

@@ -91,18 +91,28 @@ public class Threads {
       @Override
       public void run() {
          try {
+            setup();
+
             while (m_enabled.get()) {
                runOnce();
                yield();
             }
          } catch (InterruptedException e) {
             // ignore it
+         } catch (RuntimeException e) {
+            e.printStackTrace();
+         } catch (Error e) {
+            e.printStackTrace();
          } finally {
             m_latch.countDown();
          }
       }
 
-      protected abstract void runOnce();
+      protected abstract void runOnce() throws InterruptedException;
+
+      protected void setup() {
+         // to be overridden
+      }
 
       @Override
       public void shutdown() {

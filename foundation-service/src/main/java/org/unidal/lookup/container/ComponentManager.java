@@ -202,6 +202,7 @@ public class ComponentManager {
    void register(ComponentKey key, Object component) {
       ComponentBox<Object> box = new ComponentBox<Object>(m_lifecycle).register(key, component);
 
+      m_hijacked.add(key);
       m_components.put(key.getRole(), box);
       m_modelManager.setComponentModel(key, component.getClass());
    }

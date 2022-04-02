@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 public class ComponentModelManager {
    private List<PlexusModel> m_models = new ArrayList<PlexusModel>();
 
-   // for test purpose
+   // i.e. for test purpose
    private PlexusModel m_model = new PlexusModel();
 
    private Map<ComponentKey, ComponentModel> m_cache = new HashMap<ComponentKey, ComponentModel>();
@@ -158,11 +158,9 @@ public class ComponentModelManager {
    }
 
    public void setComponentModel(ComponentKey key, Class<?> clazz) {
-      for (PlexusModel model : m_models) {
-         ComponentModel component = new ComponentModel();
+      ComponentModel component = new ComponentModel();
 
-         component.setRole(key.getRole()).setRoleHint(key.getRoleHint()).setImplementation(clazz.getName());
-         model.addComponent(component);
-      }
+      component.setRole(key.getRole()).setRoleHint(key.getRoleHint()).setImplementation(clazz.getName());
+      addComponent(component);
    }
 }

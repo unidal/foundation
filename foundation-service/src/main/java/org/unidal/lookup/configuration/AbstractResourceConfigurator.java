@@ -45,7 +45,7 @@ public abstract class AbstractResourceConfigurator implements Configurator {
                role = Named.Default.class;
             }
          }
-         
+
          if (role == null) {
             throw new IllegalStateException(
                   String.format("Class(%s) is not annotated by %s.", clazz.getName(), Named.class.getName()));
@@ -53,7 +53,7 @@ public abstract class AbstractResourceConfigurator implements Configurator {
       } else {
          role = named.type();
       }
-      
+
       if (role == Named.Default.class) {
          role = clazz;
       } else {
@@ -262,13 +262,21 @@ public abstract class AbstractResourceConfigurator implements Configurator {
                }
             } else if (clazz == Map.class) {
                if (args.length == 2) {
-                  return (Class<?>) args[1];
+                  return getRawClass(args[1]);
                }
             }
          }
       }
 
       return field.getType();
+   }
+
+   private static Class<?> getRawClass(Type type) {
+      if (type instanceof ParameterizedType) {
+         return getRawClass(((ParameterizedType) type).getRawType());
+      } else {
+         return (Class<?>) type;
+      }
    }
 
    protected File getBaseDir() {

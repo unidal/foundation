@@ -1,6 +1,6 @@
 package org.unidal.lookup;
 
-public class ComponentLookupException extends Exception {
+public class ComponentLookupException extends RuntimeException {
    private static final long serialVersionUID = 1L;
 
    private static String LS = System.getProperty("line.separator");

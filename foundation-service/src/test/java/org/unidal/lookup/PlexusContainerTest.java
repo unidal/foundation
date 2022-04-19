@@ -15,15 +15,7 @@ public class PlexusContainerTest extends ComponentTestCase {
       try {
          lookup(A.class);
       } catch (Exception e) {
-         Throwable cause = e.getCause();
-
-         while (cause.getCause() != null) {
-            cause = cause.getCause();
-         }
-
-         // cause.printStackTrace();
-         Assert.assertEquals(ComponentLookupException.class, cause.getClass());
-         Assert.assertEquals(true, cause.getMessage().contains("Multiple fields(m_c1,m_c2) of class"));
+         Assert.assertEquals(true, e.getMessage().contains("Multiple fields(m_c1,m_c2) of class"));
       }
    }
 
@@ -33,16 +25,8 @@ public class PlexusContainerTest extends ComponentTestCase {
 
       try {
          lookup(C.class);
-      } catch (Exception e) {
-         Throwable cause = e.getCause();
-
-         while (cause.getCause() != null) {
-            cause = cause.getCause();
-         }
-
-         // cause.printStackTrace();
-         Assert.assertEquals(ComponentLookupException.class, cause.getClass());
-         Assert.assertEquals(true, cause.getMessage().contains("No field of class"));
+      } catch (ComponentLookupException e) {
+         Assert.assertEquals(true, e.getMessage().contains("No field of class"));
       }
    }
 
@@ -52,16 +36,8 @@ public class PlexusContainerTest extends ComponentTestCase {
 
       try {
          lookup(A.class);
-      } catch (Exception e) {
-         Throwable cause = e.getCause();
-
-         while (cause.getCause() != null) {
-            cause = cause.getCause();
-         }
-
-         // cause.printStackTrace();
-         Assert.assertEquals(ComponentLookupException.class, cause.getClass());
-         Assert.assertEquals(true, cause.getMessage().contains("No component defined!"));
+      } catch (ComponentLookupException e) {
+         Assert.assertEquals(true, e.getMessage().contains("No component defined!"));
       }
    }
 
@@ -83,7 +59,7 @@ public class PlexusContainerTest extends ComponentTestCase {
    @Named
    public static class C {
    }
-   
+
    @Named
    public static class D {
    }

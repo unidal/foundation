@@ -132,9 +132,15 @@ public class ComponentModelManager {
       Scanners.forResource().scan("META-INF/plexus", new ResourceMatcher() {
          @Override
          public Direction matches(URL base, String path) {
+            String baseUrl = base.toExternalForm();
+
+            if (!baseUrl.endsWith("/")) {
+               baseUrl += "/";
+            }
+
             if (path.startsWith("components-") && path.endsWith(".xml")) {
                try {
-                  components.add(new URL(base + "/" + path));
+                  components.add(new URL(baseUrl + path));
 
                   return Direction.MATCHED;
                } catch (Throwable e) {
@@ -142,7 +148,7 @@ public class ComponentModelManager {
                }
             } else if (path.equals("components.xml")) {
                try {
-                  components.add(new URL(base + "/" + path));
+                  components.add(new URL(baseUrl + path));
 
                   return Direction.MATCHED;
                } catch (Throwable e) {

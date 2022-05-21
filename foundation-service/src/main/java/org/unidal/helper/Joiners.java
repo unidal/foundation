@@ -51,8 +51,9 @@ public class Joiners {
          return join(Arrays.asList(array), null);
       }
 
-      public <T> String join(IBuilder<T> builder, T... array) {
-         return join(Arrays.asList(array), builder);
+      @SuppressWarnings("unchecked")
+		public <T> String join(IBuilder<T> builder, T... array2) {
+         return join(Arrays.asList(array2), builder);
       }
 
       public <T> void join(StringBuilder sb, Collection<T> list, IBuilder<T> builder) {

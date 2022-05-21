@@ -12,11 +12,6 @@
    <name>Foundation Service</name>
    <dependencies>
       <dependency>
-         <groupId>log4j</groupId>
-         <artifactId>log4j</artifactId>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <scope>provided</scope>

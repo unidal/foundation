@@ -9,7 +9,6 @@ import org.unidal.converter.ConverterManager;
 public class ArrayConverterTest extends TestCase {
    ConverterManager m_manager = ConverterManager.getInstance();
 
-   @SuppressWarnings("unchecked")
    public void testArray() {
       Integer[] integerArray = (Integer[]) m_manager.convert(new String[] { "1", "2", "3" }, Integer[].class);
 
